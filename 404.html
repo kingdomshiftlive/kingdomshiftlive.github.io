@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>KingdomShift.Live</title>
+<script>
+const path = window.location.pathname;
+const search = window.location.search;
+const hash = path.slice(1).replace(/\//g,'&p=').replace(/&/,'?');
+window.location.replace('/?' + hash + (search ? '&' + search.slice(1) : '') + '#' + window.location.hash.slice(1));
+</script>
+</head>
+<body></body>
+</html>
