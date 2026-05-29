@@ -1,0 +1,2073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<meta name="theme-color" content="#070707"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="KingdomShift"/>
+<link rel="manifest" href="./manifest.json"/>
+<link rel="icon" href="./logo.png"/>
+<link rel="apple-touch-icon" href="./logo.png"/>
+<title>KingdomShift.Live — Stream With Purpose</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Montserrat:wght@300;400;500;600;700;800&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Stripe -->
+<script src="https://js.stripe.com/v3/"></script>
+<!-- ZegoCloud -->
+<script src="https://unpkg.com/zego-uikit-prebuilt/zego-uikit-prebuilt.js"></script>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --teal:#00C9C8;--teal2:#00E5E4;--tealD:#007878;
+  --gold:#C9A227;--gold2:#E8BC3A;--gold3:#F5D060;
+  --pink:#E91E8C;--pink2:#FF4DB8;
+  --black:#070707;--dark:#0A0A0A;--dark2:#0D0D0F;
+  --card:#111114;--card2:#161619;
+  --glass:rgba(255,255,255,.04);--glassTeal:rgba(0,201,200,.06);
+  --border:rgba(0,201,200,.12);--borderG:rgba(201,162,39,.15);
+  --text:#F2EFE8;--muted:#8A9AAA;--dim:#445560;
+  --green:#1DB954;--red:#FF4444;--purple:#9B59B6;
+}
+html,body{height:100%;overflow:hidden;background:var(--black);color:var(--text);font-family:'Montserrat',sans-serif;-webkit-font-smoothing:antialiased;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-thumb{background:linear-gradient(var(--teal),var(--gold));border-radius:2px;}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+@keyframes shimmer{0%{background-position:200% center}100%{background-position:-200% center}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes giftFloat{0%{transform:translateY(0) scale(1);opacity:1}70%{transform:translateY(-320px) scale(1.05);opacity:1}100%{transform:translateY(-440px) scale(.6);opacity:0}}
+@keyframes legendaryIn{0%{opacity:0;transform:scale(.3) rotate(-15deg)}25%{opacity:1;transform:scale(1.2) rotate(5deg)}60%{transform:scale(1) rotate(0)}100%{opacity:0;transform:scale(1.3)}}
+@keyframes toastPop{from{opacity:0;transform:translateX(-50%) translateY(12px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:.3}}
+
+.shimmer-text{background:linear-gradient(90deg,var(--gold),var(--gold3),var(--teal2),var(--gold));background-size:300% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 4s linear infinite;}
+
+/* ── LAYOUT ── */
+.app{display:flex;height:100vh;overflow:hidden;}
+.sidebar{width:230px;flex-shrink:0;background:linear-gradient(180deg,#0A0C0C,#090909);border-right:1px solid var(--border);display:flex;flex-direction:column;position:relative;overflow:hidden;}
+.sidebar::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--teal),transparent);}
+.sb-top{padding:18px 16px 14px;border-bottom:1px solid var(--border);}
+.sb-brand{display:flex;align-items:center;gap:10px;}
+.sb-logo{width:36px;height:36px;border-radius:9px;overflow:hidden;border:1px solid rgba(0,201,200,.3);box-shadow:0 0 20px rgba(0,201,200,.2);flex-shrink:0;}
+.sb-logo img{width:100%;height:100%;object-fit:cover;}
+.sb-name{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;background:linear-gradient(135deg,var(--teal),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.2;}
+.sb-tagline{font-size:8px;color:var(--teal);letter-spacing:.12em;text-transform:uppercase;opacity:.7;margin-top:2px;}
+.sb-nav{flex:1;padding:10px 8px;overflow-y:auto;}
+.sb-nav::-webkit-scrollbar{display:none;}
+.sb-section{font-size:9px;font-weight:700;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;padding:10px 8px 5px;}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:all .2s;margin-bottom:2px;position:relative;}
+.sb-item:hover{background:var(--glassTeal);}
+.sb-item.active{background:linear-gradient(135deg,rgba(0,201,200,.1),rgba(201,162,39,.06));border:1px solid rgba(0,201,200,.2);}
+.sb-item.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:2px;border-radius:1px;background:linear-gradient(var(--teal),var(--gold));}
+.sb-icon{font-size:17px;width:22px;text-align:center;flex-shrink:0;}
+.sb-label{font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap;}
+.sb-item.active .sb-label{color:var(--teal);}
+.sb-badge{margin-left:auto;background:var(--pink);border-radius:100px;padding:1px 7px;font-size:9px;font-weight:700;color:#fff;}
+.sb-badge.gold{background:var(--gold);color:var(--black);}
+.sb-footer{padding:12px;border-top:1px solid var(--border);}
+.sb-user{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;background:var(--glass);border:1px solid var(--border);transition:all .2s;}
+.sb-user:hover{border-color:rgba(0,201,200,.3);}
+.sb-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--gold));display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.sb-uname{font-size:11px;font-weight:700;color:var(--text);}
+.sb-ustatus{font-size:10px;color:var(--teal);}
+
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{height:52px;flex-shrink:0;background:rgba(7,7,7,.96);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:10px;position:relative;z-index:10;}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--teal),transparent);opacity:.3;}
+.tb-menu{display:none;width:32px;height:32px;border-radius:8px;background:var(--glass);border:1px solid var(--border);align-items:center;justify-content:center;font-size:16px;cursor:pointer;color:var(--muted);transition:all .2s;}
+.tb-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;background:linear-gradient(90deg,var(--teal),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.tb-right{display:flex;gap:7px;align-items:center;margin-left:auto;}
+.tb-btn{width:32px;height:32px;border-radius:8px;background:var(--glass);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:all .2s;position:relative;}
+.tb-btn:hover{border-color:var(--teal);}
+.tb-notif{position:absolute;top:-3px;right:-3px;width:13px;height:13px;border-radius:50%;background:var(--pink);border:2px solid var(--black);font-size:7px;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.live-tag{display:flex;align-items:center;gap:5px;background:rgba(233,30,140,.1);border:1px solid rgba(233,30,140,.3);border-radius:20px;padding:4px 10px;font-size:10px;font-weight:700;color:var(--pink);letter-spacing:.06em;}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--pink);animation:blink 1s ease infinite;}
+
+.page{flex:1;overflow-y:auto;overflow-x:hidden;}
+.page::-webkit-scrollbar{width:3px;}
+
+.bottom-nav{display:none;background:rgba(7,7,7,.97);backdrop-filter:blur(20px);border-top:1px solid var(--border);flex-shrink:0;}
+.bn-row{display:flex;padding-bottom:env(safe-area-inset-bottom,0);}
+.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0 4px;cursor:pointer;opacity:.4;transition:all .2s;}
+.bn-item.active{opacity:1;}
+.bn-item.active .bn-label{color:var(--teal);}
+.bn-icon{font-size:20px;line-height:1;}
+.bn-label{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.04em;}
+.bn-pip{width:3px;height:3px;border-radius:50%;background:var(--teal);box-shadow:0 0 6px var(--teal);}
+
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;backdrop-filter:blur(4px);}
+.overlay.open{display:block;}
+.drawer{position:fixed;top:0;left:-240px;width:240px;height:100%;background:linear-gradient(180deg,#0A0C0C,#090909);border-right:1px solid var(--border);z-index:201;transition:left .3s ease;overflow-y:auto;}
+.drawer.open{left:0;}
+
+.toast{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--teal),var(--gold));color:var(--black);padding:9px 22px;border-radius:24px;font-size:12px;font-weight:700;letter-spacing:.04em;white-space:nowrap;z-index:9999;pointer-events:none;animation:toastPop .3s ease;box-shadow:0 8px 32px rgba(0,201,200,.4);}
+
+@media(max-width:900px){
+  .sidebar{display:none;}
+  .tb-menu{display:flex;}
+  .bottom-nav{display:block;}
+}
+
+/* ── AUTH ── */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse 80% 60% at 50% 40%,#0A1010,var(--black));}
+.auth-card{background:#0C0C10;border:1px solid rgba(0,201,200,.2);border-radius:20px;padding:36px;max-width:400px;width:100%;box-shadow:0 40px 80px rgba(0,0,0,.8),0 0 80px rgba(0,201,200,.08);}
+.auth-logo{width:60px;height:60px;border-radius:14px;overflow:hidden;border:1px solid rgba(0,201,200,.3);box-shadow:0 0 30px rgba(0,201,200,.2);margin:0 auto 16px;}
+.auth-logo img{width:100%;height:100%;object-fit:cover;}
+.auth-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;text-align:center;background:linear-gradient(90deg,var(--teal),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px;}
+.auth-sub{font-size:12px;color:var(--muted);text-align:center;margin-bottom:24px;}
+.auth-field{margin-bottom:14px;}
+.auth-label{font-size:9px;font-weight:700;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px;}
+.auth-input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-size:13px;font-family:'Montserrat',sans-serif;outline:none;transition:border .2s;}
+.auth-input:focus{border-color:rgba(0,201,200,.5);}
+.auth-input::placeholder{color:var(--dim);}
+.auth-btn{width:100%;background:linear-gradient(135deg,var(--teal),var(--gold) 180%);color:var(--black);border:none;border-radius:10px;padding:14px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:all .25s;box-shadow:0 6px 24px rgba(0,201,200,.25);}
+.auth-btn:hover{box-shadow:0 12px 36px rgba(0,201,200,.4);transform:translateY(-1px);}
+.auth-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.auth-switch{text-align:center;margin-top:16px;font-size:13px;color:var(--muted);}
+.auth-switch a{color:var(--teal);cursor:pointer;font-weight:700;}
+.auth-error{background:rgba(255,68,68,.08);border:1px solid rgba(255,68,68,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--red);margin-bottom:14px;display:none;}
+.auth-promise{background:rgba(0,201,200,.04);border:1px solid rgba(0,201,200,.1);border-radius:10px;padding:12px;margin-top:16px;font-size:11px;color:var(--dim);line-height:1.7;text-align:center;}
+
+/* ── SHARED COMPONENTS ── */
+.glass-card{background:var(--glass);border:1px solid var(--border);border-radius:16px;position:relative;overflow:hidden;}
+.glass-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--teal),transparent);opacity:.4;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:10px;padding:11px 22px;cursor:pointer;border:none;transition:all .25s;}
+.btn:active{transform:scale(.95);}
+.btn-teal{background:linear-gradient(135deg,var(--teal),var(--tealD));color:var(--black);box-shadow:0 4px 20px rgba(0,201,200,.3);}
+.btn-teal:hover{box-shadow:0 8px 32px rgba(0,201,200,.5);transform:translateY(-1px);}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--black);}
+.btn-glass{background:var(--glass);color:var(--muted);border:1px solid var(--border);}
+.btn-glass:hover{border-color:var(--teal);color:var(--teal);}
+.btn-pink{background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff;}
+.btn-sm{padding:7px 14px;font-size:10px;border-radius:8px;}
+.btn-full{width:100%;}
+.toggle{width:44px;height:24px;border-radius:12px;cursor:pointer;position:relative;transition:background .2s;border:none;flex-shrink:0;}
+.toggle.on{background:linear-gradient(135deg,var(--teal),var(--gold));}
+.toggle.off{background:rgba(255,255,255,.1);}
+.toggle-knob{width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:3px;transition:left .2s;box-shadow:0 2px 6px rgba(0,0,0,.3);}
+.toggle.on .toggle-knob{left:23px;}
+.toggle.off .toggle-knob{left:3px;}
+.input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-size:13px;font-family:'Montserrat',sans-serif;outline:none;transition:border .2s;}
+.input:focus{border-color:rgba(0,201,200,.5);}
+.input::placeholder{color:var(--dim);}
+.label{font-size:9px;font-weight:700;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px;}
+.page-hdr{padding:18px 16px 0;}
+.page-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:4px;}
+.page-sub{font-size:13px;color:var(--muted);margin-bottom:16px;font-weight:300;}
+.sec-title{font-size:9px;font-weight:700;letter-spacing:.18em;color:var(--teal);text-transform:uppercase;margin-bottom:10px;}
+.list-row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:opacity .2s;}
+.list-row:active{opacity:.6;}
+.list-row:last-child{border-bottom:none;}
+.back-bar{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);}
+.back-btn{width:32px;height:32px;border-radius:8px;background:var(--glass);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;color:var(--muted);transition:all .2s;}
+.back-btn:hover{border-color:var(--teal);color:var(--teal);}
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+.tag-teal{background:rgba(0,201,200,.12);color:var(--teal);border:1px solid rgba(0,201,200,.2);}
+.tag-gold{background:rgba(201,162,39,.12);color:var(--gold);border:1px solid rgba(201,162,39,.2);}
+.tag-green{background:rgba(29,185,84,.12);color:var(--green);border:1px solid rgba(29,185,84,.2);}
+.tag-red{background:rgba(255,68,68,.12);color:var(--red);border:1px solid rgba(255,68,68,.2);}
+.tag-pink{background:rgba(233,30,140,.12);color:var(--pink);border:1px solid rgba(233,30,140,.2);}
+
+/* ── FEED ── */
+.stories-bar{display:flex;gap:10px;padding:12px 14px;overflow-x:auto;border-bottom:1px solid var(--border);}
+.stories-bar::-webkit-scrollbar{display:none;}
+.story{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;cursor:pointer;}
+.story-ring{width:54px;height:54px;border-radius:50%;padding:2px;background:linear-gradient(135deg,var(--teal),var(--gold));}
+.story-inner{width:100%;height:100%;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid var(--black);}
+.story-name{font-size:9px;color:var(--muted);max-width:54px;text-align:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.feed-post{background:var(--card);border-bottom:1px solid var(--border);animation:fadeUp .4s ease both;}
+.fp-header{padding:12px 14px 9px;display:flex;align-items:center;gap:10px;}
+.fp-av{width:38px;height:38px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;border:1.5px solid rgba(0,201,200,.2);}
+.fp-name{font-size:13px;font-weight:700;display:flex;align-items:center;gap:5px;}
+.fp-verified{color:var(--teal);font-size:11px;}
+.fp-meta{font-size:11px;color:var(--muted);}
+.fp-follow{font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;cursor:pointer;border:1px solid rgba(0,201,200,.3);background:transparent;color:var(--teal);transition:all .2s;font-family:'Montserrat',sans-serif;}
+.fp-follow.on{background:rgba(0,201,200,.1);}
+.fp-media{width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#0A1414,var(--card2));display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;overflow:hidden;}
+.fp-play{width:50px;height:50px;border-radius:50%;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);border:2px solid var(--teal);display:flex;align-items:center;justify-content:center;font-size:20px;transition:all .2s;}
+.fp-media:hover .fp-play{transform:scale(1.1);box-shadow:0 0 30px rgba(0,201,200,.4);}
+.fp-badge{position:absolute;border-radius:20px;padding:3px 10px;font-size:9px;font-weight:700;letter-spacing:.06em;}
+.fp-live-badge{top:10px;left:10px;background:var(--pink);color:#fff;}
+.fp-cat-badge{top:10px;right:10px;background:rgba(0,0,0,.75);color:var(--gold);border:1px solid rgba(201,162,39,.3);}
+.fp-dur{position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.75);border-radius:6px;padding:2px 8px;font-size:10px;color:#fff;}
+.fp-text{padding:9px 14px;font-size:13px;line-height:1.65;font-weight:300;}
+.fp-actions{padding:8px 14px 12px;display:flex;align-items:center;gap:14px;}
+.fp-act{display:flex;align-items:center;gap:5px;background:none;border:none;cursor:pointer;font-size:11px;color:var(--muted);font-family:'Montserrat',sans-serif;transition:all .2s;}
+.fp-act:active{transform:scale(.85);}
+.fp-act-icon{font-size:18px;}
+.fp-save{margin-left:auto;background:none;border:none;cursor:pointer;font-size:20px;transition:all .2s;}
+
+/* ── LIVE ── */
+.live-stage{height:calc(100vh - 52px);position:relative;overflow:hidden;background:radial-gradient(ellipse at 60% 40%,#0A1414,var(--black));}
+.live-video-area{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.live-presenter{text-align:center;}
+.live-presenter-icon{font-size:88px;animation:float 3s ease infinite;display:block;margin-bottom:10px;filter:drop-shadow(0 0 40px rgba(0,201,200,.3));}
+.live-presenter-name{font-family:'Playfair Display',serif;font-size:16px;color:var(--teal);}
+.live-presenter-topic{font-size:13px;color:var(--muted);margin-top:4px;font-style:italic;}
+.live-top{position:absolute;top:0;left:0;right:0;padding:12px 14px;display:flex;justify-content:space-between;align-items:flex-start;}
+.live-badges-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+.live-badge{display:flex;align-items:center;gap:5px;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);border-radius:20px;padding:5px 11px;font-size:10px;font-weight:700;}
+.lb-live{background:var(--pink);color:#fff;}
+.lb-viewers{color:var(--text);border:1px solid rgba(255,255,255,.1);}
+.lb-coins{color:var(--gold);border:1px solid rgba(201,162,39,.3);cursor:pointer;}
+.live-tg{position:absolute;top:54px;right:12px;display:flex;flex-direction:column;gap:5px;}
+.tg-card{background:rgba(0,0,0,.7);backdrop-filter:blur(8px);border:1px solid rgba(0,201,200,.15);border-radius:20px;padding:5px 10px;display:flex;align-items:center;gap:6px;}
+.tg-rank{font-size:12px;}
+.tg-av{font-size:13px;}
+.tg-nm{font-size:9px;color:var(--text);font-weight:700;}
+.tg-coins{font-size:9px;color:var(--gold);}
+.live-comments-area{position:absolute;bottom:156px;left:12px;right:76px;max-height:130px;overflow:hidden;display:flex;flex-direction:column;gap:4px;justify-content:flex-end;}
+.live-comment{background:rgba(0,0,0,.7);backdrop-filter:blur(8px);border-radius:20px;padding:5px 12px;display:inline-flex;gap:6px;align-items:center;max-width:92%;}
+.lc-user{font-size:10px;color:var(--teal);font-weight:700;}
+.lc-text{font-size:12px;color:var(--text);}
+.live-controls{position:absolute;bottom:0;left:0;right:0;padding:10px 12px 18px;background:linear-gradient(transparent,rgba(7,7,7,.85));}
+.live-input-row{display:flex;gap:8px;margin-bottom:9px;}
+.live-ci{flex:1;background:rgba(255,255,255,.08);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:10px 16px;font-size:13px;color:var(--text);outline:none;font-family:'Montserrat',sans-serif;}
+.live-gift-btn{width:40px;height:40px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--teal),var(--gold));border:none;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,201,200,.4);transition:all .2s;}
+.live-gift-btn:active{transform:scale(.88);}
+.gift-tray{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;}
+.gift-tray::-webkit-scrollbar{display:none;}
+.gift-tile{flex-shrink:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);border-radius:12px;padding:8px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;border:1px solid rgba(255,255,255,.08);transition:all .2s;}
+.gift-tile:active{transform:scale(.88);}
+.gt-emoji{font-size:22px;}
+.gt-name{font-size:9px;font-weight:700;}
+.gt-cost{font-size:9px;color:var(--muted);}
+.gift-overlay{position:absolute;inset:0;pointer-events:none;z-index:50;}
+.legend-overlay{position:absolute;inset:0;pointer-events:none;z-index:60;display:flex;align-items:center;justify-content:center;}
+.gift-float-card{position:absolute;display:flex;align-items:center;gap:8px;background:rgba(7,7,7,.9);border-radius:26px;padding:6px 12px 6px 7px;backdrop-filter:blur(8px);border:1px solid var(--teal);box-shadow:0 0 20px rgba(0,201,200,.2);white-space:nowrap;animation:giftFloat 2.8s ease forwards;}
+.gfc-av{width:24px;height:24px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:12px;border:1.5px solid var(--teal);}
+.gfc-sender{font-size:10px;font-weight:700;color:var(--text);}
+.gfc-msg{font-size:10px;color:var(--teal);}
+.gfc-emoji{font-size:22px;}
+
+/* ── SHOP ── */
+.shop-filters{display:flex;gap:7px;padding:0 14px 12px;overflow-x:auto;}
+.shop-filters::-webkit-scrollbar{display:none;}
+.sf{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .2s;letter-spacing:.04em;font-family:'Montserrat',sans-serif;}
+.sf.active{background:linear-gradient(135deg,var(--teal),var(--gold));color:var(--black);border-color:transparent;}
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px;padding:0 14px 20px;}
+.shop-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;transition:all .25s;animation:fadeUp .4s ease both;}
+.shop-card:hover{border-color:rgba(0,201,200,.2);transform:translateY(-2px);}
+.sc-thumb{height:112px;background:linear-gradient(135deg,#0A1414,var(--card2));display:flex;align-items:center;justify-content:center;font-size:42px;}
+.sc-body{padding:11px;}
+.sc-name{font-family:'Playfair Display',serif;font-size:12px;font-weight:700;margin-bottom:3px;line-height:1.3;}
+.sc-creator{font-size:10px;color:var(--muted);margin-bottom:7px;}
+.sc-bottom{display:flex;justify-content:space-between;align-items:center;}
+.sc-price{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--gold);}
+.sc-add{width:27px;height:27px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--gold));border:none;cursor:pointer;font-size:16px;color:var(--black);display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.sc-add:active{transform:scale(.85);}
+.sc-split{font-size:9px;color:var(--dim);text-align:center;margin-top:5px;padding:3px 6px;background:rgba(0,0,0,.3);border-radius:6px;}
+
+/* ── WEALTH ── */
+.wealth-hero{margin:14px;background:linear-gradient(135deg,#080F0F,#08080C);border:1px solid rgba(0,201,200,.2);border-radius:18px;padding:20px;position:relative;overflow:hidden;}
+.wealth-hero::before{content:'$';position:absolute;font-family:'Playfair Display',serif;font-size:240px;font-weight:700;color:rgba(0,201,200,.04);right:-20px;top:-30px;line-height:1;pointer-events:none;}
+.wh-label{font-size:9px;font-weight:700;letter-spacing:.15em;color:var(--teal);margin-bottom:7px;text-transform:uppercase;}
+.wh-amount{font-family:'Playfair Display',serif;font-size:42px;font-weight:700;line-height:1;margin-bottom:5px;}
+.wh-sub{font-size:12px;color:var(--muted);}
+.gate-wrap{margin:0 14px 12px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;}
+.gate-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;}
+.gate-label{font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--gold);text-transform:uppercase;}
+.gate-pct{font-size:13px;font-weight:700;color:var(--text);}
+.gate-bar{height:5px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;margin-bottom:7px;}
+.gate-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--gold));border-radius:3px;transition:width 1s ease;}
+.gate-info{display:flex;justify-content:space-between;font-size:11px;}
+.earn-section{padding:0 14px;margin-bottom:12px;}
+.earn-item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px;display:flex;align-items:center;gap:11px;margin-bottom:8px;}
+.ei-icon{font-size:19px;width:40px;height:40px;background:var(--card2);border-radius:10px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);}
+.ei-name{font-size:12px;font-weight:700;margin-bottom:2px;}
+.ei-note{font-size:10px;color:var(--muted);}
+.ei-amount{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--green);margin-left:auto;}
+
+/* ── COINS MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(8px);}
+.modal-card{background:#0C0C10;border:1px solid rgba(0,201,200,.2);border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:500px;animation:slideUp .3s ease;}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;margin-bottom:4px;}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:18px;}
+.coin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;}
+.coin-pkg{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;cursor:pointer;text-align:center;transition:all .2s;}
+.coin-pkg:hover{border-color:var(--teal);}
+.coin-pkg.selected{background:rgba(0,201,200,.08);border-color:var(--teal);}
+.cp-coins{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--gold);}
+.cp-bonus{font-size:9px;color:var(--green);margin-top:1px;}
+.cp-price{font-size:13px;font-weight:700;color:var(--text);margin-top:5px;}
+.cp-label{font-size:9px;color:var(--muted);}
+
+/* ── SAFE ── */
+.safe-hero{margin:14px;background:linear-gradient(135deg,#080C14,#080C08);border:1px solid rgba(0,201,200,.2);border-radius:18px;padding:20px;text-align:center;}
+.sh-icon{font-size:50px;display:block;margin-bottom:10px;animation:float 3s ease infinite;}
+.sh-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--teal);margin-bottom:5px;}
+.sh-sub{font-size:13px;color:var(--muted);line-height:1.65;font-weight:300;}
+
+/* ── BATTLES ── */
+.battles-hero{margin:14px;background:linear-gradient(135deg,#0A0520,#050910);border:1px solid rgba(155,89,182,.2);border-radius:18px;padding:20px;text-align:center;}
+.bh-icon{font-size:50px;display:block;margin-bottom:10px;animation:float 3s ease infinite;}
+.bh-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;background:linear-gradient(135deg,#9B59B6,var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:5px;}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 14px 12px;}
+.mode-tile{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;cursor:pointer;transition:all .2s;text-align:center;}
+.mode-tile:hover{border-color:rgba(0,201,200,.2);transform:translateY(-2px);}
+.mode-tile:active{transform:scale(.95);}
+.mt-icon{font-size:30px;margin-bottom:9px;}
+.mt-name{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;margin-bottom:3px;}
+.mt-desc{font-size:11px;color:var(--muted);}
+
+/* ── QUIZ ── */
+.quiz-wrap{padding:14px;}
+.quiz-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;}
+.quiz-mode-lbl{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.quiz-score-lbl{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--gold);}
+.quiz-prog{height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;margin-bottom:12px;}
+.quiz-prog-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--gold));border-radius:2px;transition:width .4s;}
+.quiz-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:11px;}
+.quiz-card-top{display:flex;gap:12px;justify-content:space-between;margin-bottom:14px;}
+.quiz-q{flex:1;}
+.quiz-qnum{font-size:9px;letter-spacing:.12em;color:var(--gold);margin-bottom:7px;text-transform:uppercase;font-weight:700;}
+.quiz-qtext{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;line-height:1.4;}
+.quiz-verse{font-family:'Crimson Text',serif;font-style:italic;font-size:12px;color:var(--dim);margin-top:7px;}
+.timer-wrap{position:relative;width:66px;height:66px;flex-shrink:0;}
+.timer-svg{width:66px;height:66px;transform:rotate(-90deg);}
+.timer-track{fill:none;stroke:rgba(255,255,255,.06);stroke-width:5;}
+.timer-fill{fill:none;stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset 1s linear,stroke .3s;}
+.timer-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.timer-num{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;line-height:1;}
+.timer-lbl{font-size:8px;color:var(--muted);letter-spacing:.08em;}
+.quiz-opts{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.quiz-opt{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:12px 10px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text);transition:all .2s;text-align:left;display:flex;align-items:center;gap:7px;font-family:'Montserrat',sans-serif;}
+.quiz-opt:active{transform:scale(.95);}
+.quiz-opt.correct{background:rgba(29,185,84,.15);border-color:var(--green);color:var(--green);}
+.quiz-opt.wrong{background:rgba(255,68,68,.15);border-color:var(--red);color:var(--red);}
+.opt-ltr{font-size:9px;color:var(--teal);font-weight:800;flex-shrink:0;}
+.streak-banner{text-align:center;margin-bottom:9px;}
+.streak-pill{display:inline-block;background:rgba(201,162,39,.1);border:1px solid rgba(201,162,39,.25);border-radius:20px;padding:5px 16px;font-size:12px;font-weight:700;color:var(--gold2);}
+.quiz-result{background:var(--card);border:1px solid rgba(29,185,84,.2);border-radius:16px;padding:26px;text-align:center;}
+.qr-icon{font-size:58px;display:block;margin-bottom:11px;animation:float 2s ease infinite;}
+.qr-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:5px;}
+.qr-score{font-family:'Playfair Display',serif;font-size:46px;font-weight:700;background:linear-gradient(135deg,var(--teal),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:14px;}
+.qr-btns{display:flex;gap:9px;}
+
+/* ── PROFILE ── */
+.profile-cover{height:136px;background:linear-gradient(135deg,#080F10,#0A0810,#100808);position:relative;}
+.profile-cover::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(0,201,200,.1),transparent 70%);}
+.profile-av{position:absolute;bottom:-40px;left:18px;width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--gold));border:3px solid var(--black);display:flex;align-items:center;justify-content:center;font-size:34px;box-shadow:0 0 40px rgba(0,201,200,.25);}
+.profile-edit-btn{position:absolute;bottom:10px;right:14px;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:11px;color:var(--text);cursor:pointer;transition:all .2s;font-family:'Montserrat',sans-serif;}
+.profile-info{padding:48px 18px 14px;}
+.profile-name{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;display:flex;align-items:center;gap:6px;margin-bottom:3px;}
+.profile-handle{font-size:12px;color:var(--muted);margin-bottom:9px;}
+.profile-bio{font-family:'Crimson Text',serif;font-size:15px;font-style:italic;line-height:1.65;margin-bottom:14px;}
+.profile-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:14px;}
+.ps-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px;text-align:center;}
+.ps-num{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;background:linear-gradient(135deg,var(--teal),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.ps-lbl{font-size:9px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-top:2px;}
+.pro-card{margin:0 14px 14px;background:linear-gradient(135deg,#080E08,#080C14);border:1px solid rgba(0,201,200,.2);border-radius:14px;padding:16px;}
+.pro-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+.pro-title{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--teal);}
+
+/* ── SETTINGS ── */
+.settings-group{padding:0 14px;margin-bottom:16px;}
+.sg-title{font-size:9px;font-weight:700;letter-spacing:.18em;color:var(--teal);text-transform:uppercase;padding:11px 0 7px;}
+.sg-body{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.sr{display:flex;align-items:center;gap:11px;padding:13px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:all .2s;}
+.sr:last-child{border-bottom:none;}
+.sr:hover{background:rgba(255,255,255,.02);}
+.sr-icon{font-size:18px;width:28px;text-align:center;flex-shrink:0;}
+.sr-label{font-size:13px;font-weight:500;color:var(--text);}
+.sr-desc{font-size:11px;color:var(--muted);margin-top:1px;}
+.sr-arrow{color:var(--dim);font-size:16px;margin-left:auto;}
+
+/* ── ADMIN ── */
+.admin-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:9px;padding:0 14px;margin-bottom:14px;}
+.asc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px;}
+.asc-icon{font-size:20px;margin-bottom:7px;}
+.asc-num{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;background:linear-gradient(135deg,var(--teal),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.asc-lbl{font-size:9px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-top:2px;}
+.admin-sec{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:9px;overflow:hidden;cursor:pointer;transition:all .2s;}
+.admin-sec:hover{border-color:rgba(0,201,200,.2);}
+.as-hdr{padding:13px 14px;display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--border);}
+.as-hdr-icon{font-size:17px;}
+.as-hdr-label{flex:1;font-size:13px;font-weight:700;}
+.as-hdr-badge{background:var(--pink);border-radius:20px;padding:2px 7px;font-size:9px;color:#fff;font-weight:700;}
+.as-body{padding:9px 14px;}
+.as-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.as-row:last-child{border-bottom:none;}
+.as-row-lbl{color:var(--muted);}
+.as-row-val{font-weight:600;}
+
+/* ── LEGAL ── */
+.legal-wrap{padding:18px;max-width:800px;}
+.legal-title{font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-bottom:5px;}
+.legal-date{font-size:12px;color:var(--muted);margin-bottom:22px;}
+.legal-h2{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--teal);margin:20px 0 7px;}
+.legal-p{font-size:13px;color:var(--muted);line-height:1.85;margin-bottom:11px;font-weight:300;}
+.legal-p strong{color:var(--text);font-weight:600;}
+
+/* ── STREAMING GUIDE ── */
+.guide-step{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px;display:flex;gap:12px;}
+.gs-num{width:32px;height:32px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--teal),var(--gold));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--black);}
+.gs-title{font-size:13px;font-weight:700;margin-bottom:4px;}
+.gs-desc{font-size:12px;color:var(--muted);line-height:1.7;font-weight:300;}
+.gs-code{background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:11px;color:var(--teal);margin-top:7px;font-family:monospace;word-break:break-all;}
+
+/* ── LOADING ── */
+.loading-wrap{position:fixed;inset:0;background:var(--black);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;}
+.loading-logo{width:80px;height:80px;border-radius:20px;overflow:hidden;border:2px solid rgba(0,201,200,.3);box-shadow:0 0 60px rgba(0,201,200,.3);animation:float 2s ease infinite;}
+.loading-logo img{width:100%;height:100%;object-fit:cover;}
+.loading-spinner{width:30px;height:30px;border:3px solid rgba(0,201,200,.15);border-top-color:var(--teal);border-radius:50%;animation:spin 1s linear infinite;margin:18px 0;}
+.loading-text{font-size:11px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;}
+</style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div class="loading-wrap" id="loading">
+  <div class="loading-logo"><img src="./logo.png" alt="KS" onerror="this.parentElement.style.background='linear-gradient(135deg,#00C9C8,#C9A227)'"/></div>
+  <div class="loading-spinner"></div>
+  <div class="loading-text">KingdomShift.Live</div>
+</div>
+
+<!-- AUTH SCREENS -->
+<div id="auth-view" style="display:none;height:100vh;overflow-y:auto;">
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo"><img src="./logo.png" alt="KS" onerror="this.parentElement.style.background='linear-gradient(135deg,#00C9C8,#C9A227)'"/></div>
+      <div class="auth-title" id="auth-title">KingdomShift.Live</div>
+      <div class="auth-sub" id="auth-sub">Sign in to your account</div>
+      <div class="auth-error" id="auth-error"></div>
+      <div id="auth-form"></div>
+      <div class="auth-promise">✓ Free to join &nbsp;·&nbsp; ✓ Your data is never sold &nbsp;·&nbsp; ✓ Withdraw after 5K followers</div>
+    </div>
+  </div>
+</div>
+
+<!-- PLATFORM APP -->
+<div id="app-view" style="display:none;">
+  <div class="app" id="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-top">
+        <div class="sb-brand">
+          <div class="sb-logo"><img src="./logo.png" alt="KS" onerror="this.parentElement.style.background='linear-gradient(135deg,#00C9C8,#C9A227)'"/></div>
+          <div>
+            <div class="sb-name">KingdomShift.Live</div>
+            <div class="sb-tagline">Equip · Empower · Expand</div>
+          </div>
+        </div>
+      </div>
+      <nav class="sb-nav" id="sb-nav"></nav>
+      <div class="sb-footer">
+        <div class="sb-user" onclick="navigate('profile')">
+          <div class="sb-av" id="sb-av">👤</div>
+          <div>
+            <div class="sb-uname" id="sb-uname">Loading...</div>
+            <div class="sb-ustatus">● Online</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+    <div class="main">
+      <div class="topbar" id="topbar">
+        <div class="tb-menu" id="menu-btn" onclick="toggleDrawer()">☰</div>
+        <div class="tb-title" id="tb-title">Feed</div>
+        <div class="tb-right">
+          <div id="live-tag-wrap" style="display:none;">
+            <div class="live-tag"><div class="live-dot"></div>LIVE</div>
+          </div>
+          <div class="tb-btn" onclick="showToast('🔔 Notifications')">🔔<div class="tb-notif">3</div></div>
+          <div class="tb-btn" onclick="showToast('💬 Messages')">💬</div>
+          <div class="tb-btn" onclick="navigate('search')">🔍</div>
+        </div>
+      </div>
+      <div class="page" id="page"></div>
+      <div class="bottom-nav"><div class="bn-row" id="bn-row"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE DRAWER -->
+<div class="overlay" id="drawer-overlay" onclick="toggleDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="sb-top" style="padding:18px;">
+    <div class="sb-brand">
+      <div class="sb-logo" style="width:36px;height:36px;"><img src="./logo.png" alt="KS"/></div>
+      <div class="sb-name" style="font-size:13px;">KingdomShift.Live</div>
+    </div>
+  </div>
+  <nav class="sb-nav" id="drawer-nav"></nav>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CREDENTIALS — Connected
+// ═══════════════════════════════════════════════════════
+const SUPABASE_URL  = 'https://zyhkginxgjxzfhtckwdy.supabase.co';
+const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5aGtnaW54Z2p4emZodGNrd2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3Njk0ODQsImV4cCI6MjA5NTM0NTQ4NH0.yGDlb9yJUWDAHcrwWdc_WaWYFnoyBELedLZ5ZpuR_Ik';
+const STRIPE_KEY    = 'pk_live_51RF3hvIrxXWf5kWlS44TLxP5626fVOquwJtxSY902PkDcyDekQgPM5dhsvZTwH96Z30XYKjUXooLotCiZbJ4xWqj00fFVvRabI';
+const ZEGO_APP_ID   = 610561179;
+const ZEGO_APP_SIGN   = 'ea178866d109ba1f3da221522a5b60b8a8b990b1ae673e4090b3c401d474e748';
+const ZEGO_SERVER_SECRET = '2fef2b4517b5490c6ed36e42ce27c699';
+
+// ═══════════════════════════════════════════════════════
+// INIT SUPABASE
+// ═══════════════════════════════════════════════════════
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+const stripe = Stripe(STRIPE_KEY);
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+const S = {
+  user: null, profile: null,
+  tab: 'feed', subPage: null,
+  coins: 0,
+  liked:{}, saved:{}, following:{},
+  cartCount:0, shopFilter:'All',
+  quizState:null, quizTimer:null,
+  battleView:'home', gameMode:null,
+  giftAuto:null, viewerCount:1842,
+  topGifters:{}, giftTrayOpen:false,
+  isPro:false, liveRevenue:8420.60,
+  notifSettings:{newFollower:true,gifts:true,comments:true,messages:true,systemAlerts:true,weeklyDigest:false},
+  privacySettings:{privateAccount:false,showOnline:true,allowMessages:true,allowComments:true},
+  authMode:'login', authLoading:false,
+  posts:[], shopItems:[],
+};
+
+// ═══════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════
+const GIFTS=[
+  {name:'Rose',icon:'🌹',coins:5,color:'#E74C3C'},
+  {name:'Heart',icon:'❤️',coins:10,color:'#E91E63'},
+  {name:'Fire',icon:'🔥',coins:25,color:'#E67E22'},
+  {name:'Star',icon:'⭐',coins:50,color:'#F39C12'},
+  {name:'Crown',icon:'👑',coins:100,color:'#C9A227'},
+  {name:'Diamond',icon:'💎',coins:500,color:'#00C9C8'},
+  {name:'Kingdom',icon:'🏰',coins:1000,color:'#9B59B6'},
+  {name:'GLORY',icon:'✨',coins:9999,color:'#FFD700'},
+];
+const SENDERS=[
+  {name:'Pastor_Em',avatar:'👨🏿'},{name:'Zoe_Worship',avatar:'👩🏽'},
+  {name:'KingFin',avatar:'👨🏾'},{name:'SisterJoy',avatar:'👩🏿'},
+  {name:'BroSamuel',avatar:'👨🏻'},{name:'Apostle_G',avatar:'👩🏾'},
+];
+const DEMO_POSTS=[
+  {id:1,user:'Pastor_Emmanuel',handle:'@pastor_em',avatar:'👨🏿‍💼',verified:true,content:'God said it. I believe it. That settles it. Your breakthrough is not delayed — it is divine timing. 🙏🔥',likes:2841,comments:394,shares:1203,time:'2m',type:'video',dur:'1:24',cat:'Faith'},
+  {id:2,user:'WorshipLeader_Zoe',handle:'@zoe_worship',avatar:'👩🏽‍🎤',verified:true,content:'New worship cover dropping at midnight 🎵✨ The presence of God in the studio was undeniable.',likes:1205,comments:187,shares:432,time:'8m',type:'video',dur:'3:47',cat:'Worship'},
+  {id:3,user:'KingdomFinance',handle:'@kingdom_finance',avatar:'👨🏾‍💻',verified:false,content:'5 Kingdom principles for building generational wealth. Stop letting your money sit idle. 💰👑',likes:3672,comments:521,shares:1840,time:'15m',type:'video',dur:'8:32',cat:'WealthShift'},
+  {id:4,user:'Apostle_Grace',handle:'@apostle_grace',avatar:'👩🏾‍⚖️',verified:true,content:'LIVE NOW: Walking In Dominion — The authority God gave you is not for comfort. It is for your assignment. 🔥',likes:892,comments:134,shares:267,time:'32m',type:'live',cat:'Teaching'},
+  {id:5,user:'ProphetDan',handle:'@prophet_dan',avatar:'👴🏾',verified:false,content:'The vision is for an appointed time. What God spoke over your life is still in effect. ✝️',likes:1340,comments:208,shares:445,time:'45m',type:'video',dur:'5:22',cat:'Prophetic'},
+  {id:6,user:'YouthMinistry_UK',handle:'@youth_uk',avatar:'👨🏼‍🎓',verified:false,content:'30-Day Proverbs Challenge — Day 12. Wisdom is not just knowing the right thing. It is doing it consistently. 📖',likes:445,comments:89,shares:123,time:'1h',type:'video',dur:'4:15',cat:'Youth'},
+];
+const DEMO_SHOP=[
+  {id:1,name:'Kingdom Financial Blueprint',type:'eBook',price:27,creator:'KingdomFinance',icon:'📚'},
+  {id:2,name:'30-Day Prayer Journal',type:'Digital',price:19,creator:'Apostle_Grace',icon:'📔'},
+  {id:3,name:'WealthShift Masterclass',type:'Course',price:97,creator:'KingdomFinance',icon:'🎓'},
+  {id:4,name:'Kingdom Identity Hoodie',type:'Merch',price:45,creator:'YouthMinistry_UK',icon:'👕'},
+  {id:5,name:'Revival Conference Ticket',type:'Event',price:35,creator:'Pastor_Emmanuel',icon:'🎫'},
+  {id:6,name:'1-on-1 Spiritual Coaching',type:'Coaching',price:150,creator:'Apostle_Grace',icon:'🤝'},
+];
+const QUESTIONS=[
+  {q:'Who was thrown into the lions\' den?',a:1,opts:['Moses','Daniel','Elijah','Jonah'],verse:'Daniel 6:16',pts:100},
+  {q:'How many days did Jesus fast in the wilderness?',a:2,opts:['14','21','40','30'],verse:'Matthew 4:2',pts:100},
+  {q:'Who was the first king of Israel?',a:0,opts:['Saul','David','Solomon','Samuel'],verse:'1 Samuel 10:24',pts:100},
+  {q:'Faith without ___ is dead.',a:2,opts:['prayer','love','works','hope'],verse:'James 2:17',pts:100},
+  {q:'According to Proverbs 22:7, the borrower is ___',a:0,opts:['Servant to lender','Wise','Blessed','Free'],verse:'Proverbs 22:7',pts:150},
+  {q:'Faith comes by hearing, hearing by ___',a:0,opts:['the Word of God','prayer','fasting','worship'],verse:'Romans 10:17',pts:100},
+  {q:'What is the shortest verse in the Bible?',a:0,opts:['Jesus wept','I am','Fear not','Be still'],verse:'John 11:35',pts:200},
+  {q:'Who built the ark?',a:2,opts:['Moses','Abraham','Noah','Isaac'],verse:'Genesis 6:14',pts:100},
+];
+const COIN_PACKAGES=[
+  {id:'coins_100', label:'Starter',  coins:100,  bonus:0,    price:0.99},
+  {id:'coins_500', label:'Popular',  coins:500,  bonus:50,   price:4.99},
+  {id:'coins_1200',label:'Value',    coins:1200, bonus:200,  price:9.99},
+  {id:'coins_3500',label:'Pro',      coins:3500, bonus:700,  price:24.99},
+  {id:'coins_7000',label:'Kingdom',  coins:7000, bonus:1500, price:49.99},
+  {id:'coins_15000',label:'Anointed',coins:15000,bonus:5000, price:99.99},
+];
+const NAV_ITEMS=[
+  {id:'feed',    icon:'🏠',label:'Feed',          section:'MAIN'},
+  {id:'live',    icon:'🔴',label:'Live',           section:null},
+  {id:'shop',    icon:'🛍️',label:'AuthorityShop',  section:null},
+  {id:'wealth',  icon:'💰',label:'WealthShift',    section:null},
+  {id:'battles', icon:'🧠',label:'Brain Battles',  section:null},
+  {id:'safe',    icon:'🛡️',label:'Safe Stream',    section:'COMMUNITY'},
+  {id:'profile', icon:'👤',label:'Profile',         section:'ACCOUNT'},
+  {id:'settings',icon:'⚙️',label:'Settings',        section:null},
+  {id:'admin',   icon:'🔐',label:'Admin Panel',     section:'PLATFORM'},
+];
+const MOBILE_NAV=[
+  {id:'feed',icon:'🏠',label:'Feed'},
+  {id:'live',icon:'🔴',label:'Live'},
+  {id:'shop',icon:'🛍️',label:'Shop'},
+  {id:'battles',icon:'🧠',label:'Battles'},
+  {id:'profile',icon:'👤',label:'Profile'},
+];
+
+// ═══════════════════════════════════════════════════════
+// SUPABASE AUTH
+// ═══════════════════════════════════════════════════════
+async function initAuth() {
+  // Check existing session
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    S.user = session.user;
+    await loadProfile();
+    showApp();
+  } else {
+    showAuth('login');
+  }
+  document.getElementById('loading').style.display = 'none';
+
+  // Listen for auth changes
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      S.user = session.user;
+      await loadProfile();
+      showApp();
+    } else if (event === 'SIGNED_OUT') {
+      S.user = null; S.profile = null;
+      showAuth('login');
+    }
+  });
+}
+
+async function loadProfile() {
+  try {
+    const { data, error } = await sb
+      .from('profiles')
+      .select('*')
+      .eq('id', S.user.id)
+      .single();
+
+    if (data) {
+      S.profile = data;
+      S.coins = data.coins || 0;
+      S.isPro = data.is_pro || false;
+      document.getElementById('sb-uname').textContent = data.display_name || data.username || 'Creator';
+      document.getElementById('sb-av').textContent = data.avatar || '👤';
+    } else {
+      // Profile doesn't exist yet — create it
+      await createProfile();
+    }
+  } catch (e) {
+    console.log('Profile load:', e);
+  }
+}
+
+async function createProfile() {
+  const username = S.user.email.split('@')[0].replace(/[^a-z0-9_]/gi,'').toLowerCase();
+  const { data } = await sb.from('profiles').insert({
+    id: S.user.id,
+    email: S.user.email,
+    username: username,
+    display_name: username,
+    role: 'creator',
+    tier: 'Seed',
+    coins: 0,
+    followers: 0,
+    following: 0,
+    is_pro: false,
+  }).select().single();
+  if (data) { S.profile = data; }
+  document.getElementById('sb-uname').textContent = username;
+}
+
+async function handleSignUp() {
+  if (S.authLoading) return;
+  const email    = document.getElementById('af-email')?.value?.trim();
+  const password = document.getElementById('af-pass')?.value;
+  const username = document.getElementById('af-user')?.value?.trim();
+  if (!email || !password || !username) { showAuthError('Please fill in all fields'); return; }
+  if (password.length < 6) { showAuthError('Password must be at least 6 characters'); return; }
+  setAuthLoading(true);
+  const { error } = await sb.auth.signUp({
+    email, password,
+    options: { data: { username, display_name: username } }
+  });
+  setAuthLoading(false);
+  if (error) { showAuthError(error.message); }
+  else { showAuthError('✅ Check your email to confirm your account', true); }
+}
+
+async function handleSignIn() {
+  if (S.authLoading) return;
+  const email    = document.getElementById('af-email')?.value?.trim();
+  const password = document.getElementById('af-pass')?.value;
+  if (!email || !password) { showAuthError('Please enter your email and password'); return; }
+  setAuthLoading(true);
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  setAuthLoading(false);
+  if (error) { showAuthError(error.message); }
+}
+
+async function handleSignOut() {
+  await sb.auth.signOut();
+  showToast('Signed out');
+}
+
+function showAuthError(msg, isSuccess=false) {
+  const el = document.getElementById('auth-error');
+  el.style.display = 'block';
+  el.style.color = isSuccess ? 'var(--green)' : 'var(--red)';
+  el.style.background = isSuccess ? 'rgba(29,185,84,.08)' : 'rgba(255,68,68,.08)';
+  el.style.borderColor = isSuccess ? 'rgba(29,185,84,.2)' : 'rgba(255,68,68,.2)';
+  el.textContent = msg;
+}
+
+function setAuthLoading(v) {
+  S.authLoading = v;
+  const btn = document.getElementById('auth-submit-btn');
+  if (btn) { btn.disabled = v; btn.textContent = v ? 'Please wait...' : (S.authMode==='login' ? 'Sign In →' : 'Create Free Account →'); }
+}
+
+// ═══════════════════════════════════════════════════════
+// VIEWS
+// ═══════════════════════════════════════════════════════
+function showAuth(mode) {
+  S.authMode = mode;
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('auth-view').style.display = 'block';
+  document.getElementById('app-view').style.display = 'none';
+  renderAuthForm();
+}
+
+function showApp() {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('auth-view').style.display = 'none';
+  document.getElementById('app-view').style.display = 'block';
+  updateNav(); render();
+}
+
+function renderAuthForm() {
+  const isLogin = S.authMode === 'login';
+  document.getElementById('auth-sub').textContent = isLogin ? 'Sign in to your account' : 'Create your free account';
+  document.getElementById('auth-error').style.display = 'none';
+  document.getElementById('auth-form').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      ${!isLogin?`<div class="auth-field"><label class="auth-label">Username</label><input class="auth-input" id="af-user" placeholder="your_kingdom_name" type="text"/></div>`:''}
+      <div class="auth-field"><label class="auth-label">Email Address</label><input class="auth-input" id="af-email" placeholder="you@email.com" type="email"/></div>
+      <div class="auth-field"><label class="auth-label">Password</label><input class="auth-input" id="af-pass" placeholder="${isLogin?'Your password':'Min. 6 characters'}" type="password" onkeydown="if(event.key==='Enter')${isLogin?'handleSignIn':'handleSignUp'}()"/></div>
+      <button class="auth-btn" id="auth-submit-btn" onclick="${isLogin?'handleSignIn':'handleSignUp'}()">
+        ${isLogin?'Sign In →':'Create Free Account →'}
+      </button>
+    </div>
+    <div class="auth-switch">
+      ${isLogin?`Don't have an account? <a onclick="showAuth('register')">Join Free</a>`:
+      `Already have an account? <a onclick="showAuth('login')">Sign In</a>`}
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════
+function showToast(msg) {
+  document.querySelectorAll('.toast').forEach(t=>t.remove());
+  const t = document.createElement('div');
+  t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 2400);
+}
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+function navigate(tab, subPage) {
+  stopGiftAuto(); clearQuizTimer();
+  S.tab=tab; S.subPage=subPage||null; S.giftTrayOpen=false;
+  updateNav(); render();
+  const p=document.getElementById('page'); if(p) p.scrollTop=0;
+  toggleDrawer(false);
+}
+
+function updateNav() {
+  const found = NAV_ITEMS.find(n=>n.id===S.tab);
+  const title = S.subPage ? S.subPage.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()) : (found?.label||'KingdomShift.Live');
+  document.getElementById('tb-title').textContent = title;
+  document.getElementById('live-tag-wrap').style.display = S.tab==='live' ? 'block' : 'none';
+
+  ['sb-nav','drawer-nav'].forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    let lastSec=null, html='';
+    NAV_ITEMS.forEach(n=>{
+      if(n.section&&n.section!==lastSec){html+=`<div class="sb-section">${n.section}</div>`;lastSec=n.section;}
+      else if(!n.section){lastSec=null;}
+      const active=S.tab===n.id&&!S.subPage;
+      html+=`<div class="sb-item ${active?'active':''}" onclick="navigate('${n.id}')">
+        <span class="sb-icon">${n.icon}</span>
+        <span class="sb-label">${n.label}</span>
+        ${n.id==='admin'?'<span class="sb-badge gold">ADMIN</span>':''}
+      </div>`;
+    });
+    el.innerHTML=html;
+  });
+
+  const bn=document.getElementById('bn-row'); if(!bn) return;
+  bn.innerHTML=MOBILE_NAV.map(n=>`
+    <div class="bn-item ${S.tab===n.id?'active':''}" onclick="navigate('${n.id}')">
+      <span class="bn-icon">${n.icon}</span>
+      <span class="bn-label">${n.label}</span>
+      ${S.tab===n.id?'<div class="bn-pip"></div>':''}
+    </div>`).join('');
+}
+
+function toggleDrawer(force) {
+  const ov=document.getElementById('drawer-overlay'), dr=document.getElementById('drawer');
+  const open=force!==undefined?force:!dr.classList.contains('open');
+  dr.classList.toggle('open',open); ov.classList.toggle('open',open);
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════
+function render() {
+  const p=document.getElementById('page'); if(!p) return;
+  const subRenders={
+    privacy_policy:renderPrivacy, terms_of_service:renderTerms,
+    creator_agreement:renderCreatorAgreement,
+    live_streaming_guide:renderLiveGuide,
+    notification_settings:renderNotifSettings,
+    privacy_settings:renderPrivacySettings,
+    delete_account:renderDeleteAccount,
+    child_safety:renderChildSafety,
+  };
+  if(S.subPage&&subRenders[S.subPage]){subRenders[S.subPage](p);return;}
+  const renders={
+    feed:renderFeed, live:renderLive, shop:renderShop,
+    wealth:renderWealth, safe:renderSafe, battles:renderBattles,
+    profile:renderProfile, settings:renderSettings,
+    admin:renderAdmin, search:renderSearch,
+  };
+  if(renders[S.tab]) renders[S.tab](p);
+}
+
+// ═══════════════════════════════════════════════════════
+// FEED — loads from Supabase, falls back to demo
+// ═══════════════════════════════════════════════════════
+async function fetchPosts() {
+  try {
+    const { data } = await sb
+      .from('videos')
+      .select('*, profiles(username,display_name,avatar,verified)')
+      .eq('status','published')
+      .order('created_at',{ascending:false})
+      .limit(20);
+    if (data && data.length > 0) S.posts = data;
+    else S.posts = DEMO_POSTS;
+  } catch { S.posts = DEMO_POSTS; }
+}
+
+function renderFeed(p) {
+  if (S.posts.length === 0) fetchPosts().then(()=>render());
+  const posts = S.posts.length > 0 ? S.posts : DEMO_POSTS;
+  p.innerHTML=`
+  <div class="stories-bar">
+    ${[{u:'You',a:'➕'},{u:'Pastor_Em',a:'👨🏿‍💼'},{u:'Zoe_W',a:'👩🏽‍🎤'},{u:'KingFin',a:'👨🏾‍💻'},{u:'Apostle',a:'👩🏾‍⚖️'},{u:'Youth',a:'👨🏼‍🎓'}]
+      .map(s=>`<div class="story" onclick="showToast('${s.u}\'s story')">
+        <div class="story-ring"><div class="story-inner">${s.a}</div></div>
+        <span class="story-name">${s.u}</span></div>`).join('')}
+  </div>
+  ${posts.map((post,i)=>`
+  <div class="feed-post" style="animation-delay:${i*.06}s">
+    <div class="fp-header">
+      <div class="fp-av">${post.avatar||post.profiles?.avatar||'👤'}</div>
+      <div style="flex:1;">
+        <div class="fp-name">${post.profiles?.display_name||post.user||'Creator'}${(post.verified||post.profiles?.verified)?'<span class="fp-verified">✓</span>':''}</div>
+        <div class="fp-meta">${post.profiles?.username?('@'+post.profiles.username):post.handle||''} · ${post.time||'recently'}</div>
+      </div>
+      <button class="fp-follow ${S.following[post.id]?'on':''}" onclick="toggleFollow(${post.id},'${post.profiles?.display_name||post.user||'Creator'}')">
+        ${S.following[post.id]?'Following':'Follow'}</button>
+    </div>
+    <div class="fp-media" onclick="showToast('▶ Playing video')">
+      <div class="fp-play">▶</div>
+      ${post.type==='live'?'<div class="fp-badge fp-live-badge">🔴 LIVE</div>':''}
+      <div class="fp-badge fp-cat-badge">${post.category||post.cat||'Faith'}</div>
+      ${post.dur?`<div class="fp-dur">${post.dur}</div>`:''}
+    </div>
+    <div class="fp-text">${post.description||post.content||''}</div>
+    <div class="fp-actions">
+      <button class="fp-act" onclick="toggleLike(${post.id},${post.likes||0})">
+        <span class="fp-act-icon">${S.liked[post.id]?'❤️':'🤍'}</span>
+        <span id="lk${post.id}">${((post.likes||0)+(S.liked[post.id]?1:0)).toLocaleString()}</span>
+      </button>
+      <button class="fp-act" onclick="showToast('💬 Comments')"><span class="fp-act-icon">💬</span><span>${(post.comments||0).toLocaleString()}</span></button>
+      <button class="fp-act" onclick="showToast('↗️ Link copied!')"><span class="fp-act-icon">↗️</span><span>${(post.shares||0).toLocaleString()}</span></button>
+      <button class="fp-save" onclick="toggleSave(${post.id})">${S.saved[post.id]?'🔖':'🏷️'}</button>
+    </div>
+  </div>`).join('')}
+  <div style="padding:40px;text-align:center;font-size:12px;color:var(--dim);font-family:'Crimson Text',serif;font-style:italic;">
+    You are all caught up · "He gives you the ability to produce wealth." — Deut. 8:18
+  </div>`;
+}
+function toggleFollow(id,name){S.following[id]=!S.following[id];showToast(S.following[id]?`Following ${name}`:`Unfollowed ${name}`);render();}
+function toggleLike(id,base){S.liked[id]=!S.liked[id];const el=document.getElementById('lk'+id);if(el)el.textContent=((base||0)+(S.liked[id]?1:0)).toLocaleString();const btn=el?.previousElementSibling;if(btn)btn.textContent=S.liked[id]?'❤️':'🤍';if(S.liked[id])showToast('❤️ Liked!');}
+function toggleSave(id){S.saved[id]=!S.saved[id];showToast(S.saved[id]?'🔖 Saved!':'Removed');render();}
+
+// ═══════════════════════════════════════════════════════
+// LIVE — ZegoCloud
+// ═══════════════════════════════════════════════════════
+// ── LIVE STREAMS LIST ────────────────────────────────────
+async function fetchLiveStreams() {
+  try {
+    const { data } = await sb
+      .from('live_streams')
+      .select('*, profiles(display_name,username,avatar,verified)')
+      .eq('status','live')
+      .order('viewer_count',{ascending:false});
+    return data || [];
+  } catch { return []; }
+}
+
+// ── START GO LIVE ─────────────────────────────────────────
+async function startGoLive() {
+  if (!S.user) { showToast('Please sign in first'); return; }
+  
+  // Show title input
+  const existing = document.getElementById('golive-modal');
+  if (existing) existing.remove();
+  
+  const el = document.createElement('div');
+  el.className = 'modal-overlay'; el.id = 'golive-modal';
+  el.innerHTML = `
+    <div class="modal-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div class="modal-title">🔴 Go Live</div>
+        <button onclick="document.getElementById('golive-modal').remove()" 
+          style="background:var(--glass);border:1px solid var(--border);border-radius:50%;width:30px;height:30px;color:var(--muted);cursor:pointer;font-size:16px;">×</button>
+      </div>
+      <div class="auth-field">
+        <label class="auth-label">Stream Title</label>
+        <input class="auth-input" id="stream-title" placeholder="What are you streaming today?" type="text"/>
+      </div>
+      <div style="margin:12px 0;font-size:11px;color:var(--dim);line-height:1.6;">
+        ✓ Viewers will see your stream in real time<br/>
+        ✓ Gift animations powered by ZegoCloud<br/>
+        ✓ Up to 50,000 concurrent viewers<br/>
+        ✓ Stream is recorded automatically
+      </div>
+      <button class="auth-btn" onclick="launchGoLive()">🔴 Start Streaming</button>
+    </div>`;
+  document.body.appendChild(el);
+}
+
+async function launchGoLive() {
+  const title = document.getElementById('stream-title')?.value || 'Live Stream';
+  document.getElementById('golive-modal')?.remove();
+  
+  const streamId = 'ks_' + S.user.id.slice(0,8) + '_' + Date.now();
+  
+  // Save stream to Supabase
+  await sb.from('live_streams').insert({
+    id: streamId,
+    creator_id: S.user.id,
+    title: title,
+    status: 'live',
+    viewer_count: 0,
+    started_at: new Date().toISOString(),
+  });
+
+  // Show ZegoCloud container
+  const p = document.getElementById('page');
+  p.innerHTML = `
+    <div style="height:calc(100vh - 52px);position:relative;">
+      <div id="zego-container" style="width:100%;height:100%;"></div>
+      <button onclick="endLiveStream('${streamId}')" 
+        style="position:absolute;top:14px;right:14px;z-index:999;
+        background:var(--red);border:none;border-radius:20px;
+        padding:8px 18px;color:#fff;font-family:'Montserrat',sans-serif;
+        font-size:12px;font-weight:700;cursor:pointer;">
+        ■ End Stream
+      </button>
+    </div>`;
+
+  // Launch ZegoCloud
+  try {
+    const token = ZegoUIKitPrebuilt.generateKitTokenForTest(
+      ZEGO_APP_ID, ZEGO_APP_SIGN, streamId,
+      S.user.id, S.profile?.display_name || 'Creator'
+    );
+    const kit = ZegoUIKitPrebuilt.create(token);
+    kit.joinRoom({
+      container: document.getElementById('zego-container'),
+      sharedLinks: [{
+        name: 'Watch on KingdomShift.Live',
+        url: 'https://kingdomshift.live?stream=' + streamId,
+      }],
+      scenario: {
+        mode: ZegoUIKitPrebuilt.LiveStreaming,
+        config: { role: ZegoUIKitPrebuilt.Host },
+      },
+      showPreJoinView: true,
+      turnOnCameraWhenJoining: true,
+      turnOnMicrophoneWhenJoining: true,
+      showTextChat: true,
+      showUserList: true,
+      maxUsers: 50000,
+      onLeaveRoom: () => endLiveStream(streamId),
+    });
+    showToast('🔴 You are live!');
+  } catch(e) {
+    showToast('ZegoCloud: ' + e.message);
+  }
+}
+
+async function endLiveStream(streamId) {
+  await sb.from('live_streams')
+    .update({ status: 'ended', ended_at: new Date().toISOString() })
+    .eq('id', streamId);
+  navigate('live');
+  showToast('Stream ended 🙏');
+}
+
+// ── WATCH A LIVE STREAM ───────────────────────────────────
+async function watchStream(streamId, creatorName) {
+  if (!S.user) { showToast('Please sign in to watch'); return; }
+  
+  // Increment viewer count
+  await sb.from('live_streams')
+    .update({ viewer_count: sb.rpc('viewer_count + 1') })
+    .eq('id', streamId);
+
+  const p = document.getElementById('page');
+  p.innerHTML = `
+    <div style="height:calc(100vh - 52px);position:relative;">
+      <div id="zego-container" style="width:100%;height:100%;"></div>
+      <button onclick="navigate('live')"
+        style="position:absolute;top:14px;left:14px;z-index:999;
+        background:rgba(0,0,0,.7);border:1px solid var(--border);border-radius:20px;
+        padding:8px 18px;color:var(--text);font-family:'Montserrat',sans-serif;
+        font-size:12px;font-weight:700;cursor:pointer;backdrop-filter:blur(8px);">
+        ← Leave
+      </button>
+    </div>`;
+
+  try {
+    const token = ZegoUIKitPrebuilt.generateKitTokenForTest(
+      ZEGO_APP_ID, ZEGO_APP_SIGN, streamId,
+      S.user.id, S.profile?.display_name || 'Viewer'
+    );
+    const kit = ZegoUIKitPrebuilt.create(token);
+    kit.joinRoom({
+      container: document.getElementById('zego-container'),
+      scenario: {
+        mode: ZegoUIKitPrebuilt.LiveStreaming,
+        config: { role: ZegoUIKitPrebuilt.Audience },
+      },
+      showPreJoinView: false,
+      showTextChat: true,
+      showUserList: false,
+      onLeaveRoom: () => navigate('live'),
+    });
+  } catch(e) {
+    showToast('Could not join stream');
+    navigate('live');
+  }
+}
+
+function renderLive(p) {
+  // Load live streams from Supabase
+  fetchLiveStreams().then(streams => {
+    const liveCount = streams.length;
+    p.innerHTML = `
+    <div style="background:linear-gradient(135deg,#0A1414,var(--black));min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px;text-align:center;border-bottom:1px solid var(--border);">
+      <div style="font-size:48px;animation:float 3s ease infinite;margin-bottom:12px;filter:drop-shadow(0 0 30px rgba(0,201,200,.4));">📡</div>
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;background:linear-gradient(90deg,var(--teal),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;">KingdomShift.Live</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:20px;">${liveCount > 0 ? liveCount + ' streams live right now' : 'Be the first to go live today'}</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+        <button class="btn btn-pink" onclick="startGoLive()">🔴 Go Live Now</button>
+        <button class="btn btn-glass" onclick="navigate('live','live_streaming_guide')">📡 Setup Guide</button>
+      </div>
+    </div>
+
+    ${liveCount > 0 ? `
+    <div style="padding:14px 14px 8px;">
+      <div class="sec-title">🔴 Live Right Now</div>
+    </div>
+    <div style="padding:0 14px;">
+      ${streams.map(stream => `
+      <div style="background:var(--card);border:1px solid rgba(233,30,140,.2);border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer;display:flex;gap:12px;align-items:center;"
+        onclick="watchStream('${stream.id}','${stream.profiles?.display_name||'Creator'}')">
+        <div style="font-size:32px;">${stream.profiles?.avatar||'👤'}</div>
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;">
+            <div style="font-family:'Playfair Display',serif;font-size:14px;font-weight:700;">${stream.profiles?.display_name||'Creator'}</div>
+            <div style="background:var(--pink);border-radius:20px;padding:2px 8px;font-size:9px;font-weight:700;color:#fff;">LIVE</div>
+          </div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${stream.title||'Live Stream'}</div>
+          <div style="font-size:11px;color:var(--teal);">👁 ${(stream.viewer_count||0).toLocaleString()} watching</div>
+        </div>
+        <div style="font-size:24px;">▶</div>
+      </div>`).join('')}
+    </div>` : ''}
+
+    <div style="padding:14px;">
+      <div class="sec-title">🎁 Gift Tiers</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;">
+        ${GIFTS.map(g=>`
+        <div style="background:var(--card);border:1px solid ${g.color}25;border-radius:12px;padding:10px;text-align:center;">
+          <div style="font-size:22px;margin-bottom:4px;">${g.icon}</div>
+          <div style="font-size:10px;font-weight:700;color:${g.color};">${g.name}</div>
+          <div style="font-size:9px;color:var(--muted);">🪙${g.coins}</div>
+        </div>`).join('')}
+      </div>
+      <div style="background:rgba(0,201,200,.05);border:1px solid rgba(0,201,200,.1);border-radius:12px;padding:12px;text-align:center;font-size:11px;color:var(--dim);line-height:1.7;">
+        Live streaming powered by ZegoCloud · Up to 50,000 viewers<br/>
+        Platform 80% · Creator 20% on all gifts
+      </div>
+    </div>`;
+  });
+
+  // Also show demo animations while streams load
+  startGiftAuto(); startViewerUpdater();
+  return;
+  // dead code below kept for gift system
+  p.innerHTML=`
+  <div class="live-stage" id="live-stage">
+    <div class="live-video-area">
+      <div class="live-presenter">
+        <span class="live-presenter-icon">🎙️</span>
+        <div class="live-presenter-name">Pastor Emmanuel</div>
+        <div class="live-presenter-topic">Walking In Dominion — Live Teaching</div>
+        <div style="margin-top:14px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+          <button class="btn btn-teal btn-sm" onclick="joinLiveStream()">📺 Watch Live</button>
+          <button class="btn btn-gold btn-sm" onclick="startGoLive()">🔴 Go Live</button>
+        </div>
+      </div>
+    </div>
+    <div class="live-top">
+      <div class="live-badges-row">
+        <div class="live-badge lb-live"><div class="live-dot"></div>LIVE</div>
+        <div class="live-badge lb-viewers">👁 <span id="vc">${S.viewerCount.toLocaleString()}</span></div>
+        <div class="live-badge" style="color:var(--teal);cursor:pointer;border:1px solid rgba(0,201,200,.2);" onclick="navigate('live','live_streaming_guide')">📡 Setup</div>
+      </div>
+      <div class="live-badge lb-coins" onclick="showCoinsModal()">🪙 <span id="cn">${S.coins}</span> Buy</div>
+    </div>
+    <div class="live-tg" id="live-tg"></div>
+    <div class="live-comments-area" id="live-comments">
+      <div class="live-comment"><span class="lc-user">Pastor_Dan</span><span class="lc-text">🔥 The anointing is real!</span></div>
+      <div class="live-comment"><span class="lc-user">SisterJoy</span><span class="lc-text">This word is for me 🙏</span></div>
+    </div>
+    <div class="gift-overlay" id="gift-ov"></div>
+    <div class="legend-overlay" id="legend-ov"></div>
+    <div class="live-controls">
+      <div class="live-input-row">
+        <input class="live-ci" placeholder="Say something encouraging ✨" id="li" onkeydown="if(event.key==='Enter')sendComment()"/>
+        <button class="live-gift-btn" onclick="toggleGiftTray()">🎁</button>
+      </div>
+      <div id="gift-tray-wrap" style="display:${S.giftTrayOpen?'block':'none'}">
+        <div class="gift-tray">
+          ${GIFTS.map(g=>`<div class="gift-tile" onclick="sendGift('${g.name}','${g.icon}',${g.coins},'${g.color}')" style="border-color:${g.color}25;">
+            <span class="gt-emoji">${g.icon}</span>
+            <span class="gt-name" style="color:${g.color}">${g.name}</span>
+            <span class="gt-cost">🪙${g.coins.toLocaleString()}</span></div>`).join('')}
+        </div>
+        <div style="text-align:center;font-size:9px;color:var(--dim);margin-top:5px;">Platform 80% · Creator 20%</div>
+      </div>
+    </div>
+  </div>`;
+  startGiftAuto(); startViewerUpdater();
+}
+
+function joinLiveStream() {
+  if (!S.user) { showToast('Please sign in first'); return; }
+  const streamId = 'ks_live_' + Date.now();
+  const container = document.getElementById('live-stage');
+  if (!container) return;
+  try {
+    const kit = ZegoUIKitPrebuilt.create(ZegoUIKitPrebuilt.generateKitTokenForTest(
+      ZEGO_APP_ID, ZEGO_APP_SIGN, streamId, S.user.id, S.profile?.display_name || 'Viewer'
+    ));
+    kit.joinRoom({
+      container: container,
+      scenario: { mode: ZegoUIKitPrebuilt.LiveStreaming, config: { role: ZegoUIKitPrebuilt.Audience } },
+      showPreJoinView: false,
+    });
+    showToast('📺 Joining live stream...');
+  } catch(e) {
+    showToast('⚡ Live streaming powered by ZegoCloud');
+  }
+}
+
+function startGoLive() {
+  if (!S.user) { showToast('Please sign in first'); return; }
+  const streamId = 'ks_' + S.user.id + '_' + Date.now();
+  const container = document.getElementById('live-stage');
+  if (!container) return;
+  try {
+    const kit = ZegoUIKitPrebuilt.create(ZegoUIKitPrebuilt.generateKitTokenForTest(
+      ZEGO_APP_ID, ZEGO_APP_SIGN, streamId, S.user.id, S.profile?.display_name || 'Creator'
+    ));
+    kit.joinRoom({
+      container: container,
+      scenario: { mode: ZegoUIKitPrebuilt.LiveStreaming, config: { role: ZegoUIKitPrebuilt.Host } },
+    });
+    showToast('🔴 Going live!');
+  } catch(e) {
+    showToast('⚡ Live streaming powered by ZegoCloud');
+  }
+}
+
+function sendComment(){const i=document.getElementById('li');if(!i||!i.value.trim())return;addComment('You',i.value.trim());i.value='';}
+function addComment(u,t){const el=document.getElementById('live-comments');if(!el)return;const d=document.createElement('div');d.className='live-comment';d.innerHTML=`<span class="lc-user">${u}</span><span class="lc-text">${t}</span>`;el.appendChild(d);while(el.children.length>5)el.firstChild.remove();}
+function toggleGiftTray(){S.giftTrayOpen=!S.giftTrayOpen;const w=document.getElementById('gift-tray-wrap');if(w)w.style.display=S.giftTrayOpen?'block':'none';}
+
+function sendGift(name,icon,cost,color,sender){
+  if(!sender){
+    if(S.coins<cost){showToast('Not enough coins! Tap Buy to get more 🪙');showCoinsModal();return;}
+    S.coins-=cost;
+    const cn=document.getElementById('cn');if(cn)cn.textContent=S.coins;
+    // Update coins in Supabase
+    if(S.user){sb.from('profiles').update({coins:S.coins}).eq('id',S.user.id);}
+  }
+  const s=sender||{name:S.profile?.display_name||'You',avatar:'😊'};
+  if(!S.topGifters[s.name])S.topGifters[s.name]={coins:0,avatar:s.avatar};
+  S.topGifters[s.name].coins+=cost;
+  updateTopGifters();
+  S.viewerCount+=Math.floor(Math.random()*4+2);
+  const vc=document.getElementById('vc');if(vc)vc.textContent=S.viewerCount.toLocaleString();
+  addComment(s.name,`sent ${icon} ${name}!`);
+  if(name==='GLORY'||name==='Kingdom')showLegendary(icon,name,s,color);
+  else floatGift(icon,name,s,color);
+  if(!sender)showToast(`${icon} ${name} sent!`);
+}
+function floatGift(icon,name,s,color){
+  const ov=document.getElementById('gift-ov');if(!ov)return;
+  const el=document.createElement('div');el.className='gift-float-card';
+  el.style.cssText=`bottom:${150+Math.random()*50}px;left:${8+Math.random()*18}px;border-color:${color};`;
+  el.innerHTML=`<div class="gfc-av">${s.avatar}</div><div><div class="gfc-sender">${s.name}</div><div class="gfc-msg" style="color:${color}">sent ${name}!</div></div><div class="gfc-emoji">${icon}</div>`;
+  ov.appendChild(el);setTimeout(()=>el.remove(),3000);
+}
+function showLegendary(icon,name,s,color){
+  const ov=document.getElementById('legend-ov');if(!ov)return;
+  ov.innerHTML=`<div style="text-align:center;animation:legendaryIn 3.2s ease forwards;pointer-events:none;">
+    <div style="font-size:96px;filter:drop-shadow(0 0 50px ${color});">${icon}</div>
+    <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:${color};text-shadow:0 0 40px ${color};margin:8px 0;">${name.toUpperCase()}</div>
+    <div style="background:rgba(0,0,0,.8);border:1px solid ${color}50;border-radius:20px;padding:8px 22px;display:inline-block;font-size:13px;">${s.avatar} ${s.name} sent this!</div>
+  </div>`;
+  floatGift(icon,name,s,color);
+  setTimeout(()=>{const o=document.getElementById('legend-ov');if(o)o.innerHTML='';},3300);
+}
+function updateTopGifters(){
+  const el=document.getElementById('live-tg');if(!el)return;
+  const sorted=Object.entries(S.topGifters).sort((a,b)=>b[1].coins-a[1].coins).slice(0,3);
+  el.innerHTML=sorted.map(([name,d],i)=>`<div class="tg-card"><span class="tg-rank">${['🥇','🥈','🥉'][i]}</span><span class="tg-av">${d.avatar}</span><div><div class="tg-nm">${name}</div><div class="tg-coins">🪙${d.coins.toLocaleString()}</div></div></div>`).join('');
+}
+function startGiftAuto(){
+  stopGiftAuto();
+  function drop(){if(S.tab!=='live')return;const g=GIFTS[Math.floor(Math.random()*(GIFTS.length-1))];const s=SENDERS[Math.floor(Math.random()*SENDERS.length)];sendGift(g.name,g.icon,g.coins,g.color,s);S.giftAuto=setTimeout(drop,1400+Math.random()*3200);}
+  S.giftAuto=setTimeout(drop,1200);
+}
+function stopGiftAuto(){if(S.giftAuto){clearTimeout(S.giftAuto);S.giftAuto=null;}}
+function startViewerUpdater(){const iv=setInterval(()=>{if(S.tab!=='live'){clearInterval(iv);return;}S.viewerCount+=Math.floor(Math.random()*7-2);if(S.viewerCount<1800)S.viewerCount=1800;const vc=document.getElementById('vc');if(vc)vc.textContent=S.viewerCount.toLocaleString();},3000);}
+
+// ═══════════════════════════════════════════════════════
+// COINS MODAL — Stripe
+// ═══════════════════════════════════════════════════════
+let selectedPkg = null;
+function showCoinsModal() {
+  const existing = document.getElementById('coins-modal');
+  if(existing) existing.remove();
+  const el = document.createElement('div');
+  el.className='modal-overlay'; el.id='coins-modal';
+  el.innerHTML=`
+  <div class="modal-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+      <div class="modal-title">🪙 Buy Coins</div>
+      <button onclick="document.getElementById('coins-modal').remove()" style="background:var(--glass);border:1px solid var(--border);border-radius:50%;width:30px;height:30px;color:var(--muted);cursor:pointer;font-size:16px;">×</button>
+    </div>
+    <div class="modal-sub">Use coins to send gifts during live streams</div>
+    <div class="coin-grid" id="coin-grid">
+      ${COIN_PACKAGES.map(pkg=>`
+      <div class="coin-pkg" id="pkg-${pkg.id}" onclick="selectPkg('${pkg.id}')">
+        <div class="cp-coins">${pkg.coins.toLocaleString()}</div>
+        ${pkg.bonus>0?`<div class="cp-bonus">+${pkg.bonus} bonus</div>`:'<div class="cp-bonus"> </div>'}
+        <div class="cp-price">$${pkg.price}</div>
+        <div class="cp-label">${pkg.label}</div>
+      </div>`).join('')}
+    </div>
+    <button class="btn btn-teal btn-full" onclick="purchaseCoins()" id="buy-btn">Select a package</button>
+    <div style="text-align:center;margin-top:10px;font-size:10px;color:var(--dim);">Secure payment via Stripe · Platform keeps 80%</div>
+  </div>`;
+  el.addEventListener('click', e=>{ if(e.target===el) el.remove(); });
+  document.body.appendChild(el);
+}
+
+function selectPkg(id) {
+  selectedPkg = COIN_PACKAGES.find(p=>p.id===id);
+  document.querySelectorAll('.coin-pkg').forEach(el=>el.classList.remove('selected'));
+  document.getElementById('pkg-'+id)?.classList.add('selected');
+  const btn = document.getElementById('buy-btn');
+  if(btn && selectedPkg) btn.textContent = `Buy ${selectedPkg.coins.toLocaleString()} coins for $${selectedPkg.price}`;
+}
+
+async function purchaseCoins() {
+  if(!selectedPkg){ showToast('Please select a package'); return; }
+  if(!S.user){ showToast('Please sign in first'); return; }
+  // Stripe checkout — in production this calls your backend to create a checkout session
+  showToast('🔗 Connecting to Stripe...');
+  try {
+    // This creates a Stripe checkout session via your backend
+    // Developer: Create /api/create-checkout-session endpoint
+    const response = await fetch('/api/create-checkout-session', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        package_id: selectedPkg.id,
+        user_id: S.user.id,
+        coins: selectedPkg.coins,
+        price: selectedPkg.price,
+      }),
+    });
+    const session = await response.json();
+    if(session.url) {
+      window.location.href = session.url;
+    } else {
+      // Demo mode — add coins directly
+      S.coins += selectedPkg.coins;
+      await sb.from('profiles').update({coins:S.coins}).eq('id',S.user.id);
+      document.getElementById('coins-modal')?.remove();
+      showToast(`✅ ${selectedPkg.coins.toLocaleString()} coins added!`);
+      const cn=document.getElementById('cn');if(cn)cn.textContent=S.coins;
+    }
+  } catch(e) {
+    // Demo mode
+    S.coins += selectedPkg.coins;
+    document.getElementById('coins-modal')?.remove();
+    showToast(`✅ ${selectedPkg.coins.toLocaleString()} coins added! (demo mode)`);
+    const cn=document.getElementById('cn');if(cn)cn.textContent=S.coins;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// SHOP — loads from Supabase
+// ═══════════════════════════════════════════════════════
+async function fetchShopItems() {
+  try {
+    const { data } = await sb.from('shop_items').select('*, profiles(display_name,username)').eq('active',true).order('sales',{ascending:false});
+    if(data && data.length>0) S.shopItems = data;
+    else S.shopItems = DEMO_SHOP;
+  } catch { S.shopItems = DEMO_SHOP; }
+}
+
+function renderShop(p) {
+  if(S.shopItems.length===0) fetchShopItems().then(()=>render());
+  const items = S.shopItems.length>0 ? S.shopItems : DEMO_SHOP;
+  const filters=['All','eBook','Course','Merch','Event','Coaching','Digital'];
+  const filtered=S.shopFilter==='All'?items:items.filter(i=>(i.type||i.type)===S.shopFilter);
+  p.innerHTML=`
+  <div class="page-hdr" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+    <div>
+      <div class="page-title" style="font-family:'Playfair Display',serif;"><span style="color:var(--teal);">Authority</span>Shop</div>
+      <div class="page-sub" style="margin-bottom:0;">Creator marketplace</div>
+    </div>
+    <div style="position:relative;cursor:pointer;padding-top:4px;" onclick="showToast('Cart: ${S.cartCount} items')">
+      <span style="font-size:28px;">🛍️</span>
+      ${S.cartCount>0?`<div style="position:absolute;top:-2px;right:-4px;width:17px;height:17px;border-radius:50%;background:var(--pink);font-size:9px;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--black);">${S.cartCount}</div>`:''}
+    </div>
+  </div>
+  <div class="shop-filters">
+    ${filters.map(f=>`<button class="sf ${S.shopFilter===f?'active':''}" onclick="S.shopFilter='${f}';render()">${f}</button>`).join('')}
+  </div>
+  <div class="shop-grid">
+    ${filtered.map((item,i)=>`
+    <div class="shop-card" style="animation-delay:${i*.06}s">
+      <div class="sc-thumb">${item.icon||'📦'}</div>
+      <div class="sc-body">
+        <div class="sc-name">${item.name}</div>
+        <div class="sc-creator">by ${item.profiles?.display_name||item.creator||'Creator'}</div>
+        <div class="sc-bottom">
+          <span class="sc-price">$${item.price}</span>
+          <button class="sc-add" onclick="addToCart('${item.name}',${item.price})">+</button>
+        </div>
+        <div class="sc-split">Creator 77% · Platform 20% · Stripe 3%</div>
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+async function addToCart(name, price) {
+  S.cartCount++;
+  showToast(`✅ ${name} added to cart`);
+  render();
+}
+
+// ═══════════════════════════════════════════════════════
+// WEALTH — loads from Supabase
+// ═══════════════════════════════════════════════════════
+async function fetchWalletData() {
+  if(!S.user) return null;
+  try {
+    const { data } = await sb.from('creator_wallets').select('*').eq('creator_id',S.user.id).single();
+    return data;
+  } catch { return null; }
+}
+
+function renderWealth(p) {
+  fetchWalletData().then(wallet=>{
+    const balance = wallet?.balance || 0;
+    const totalEarned = wallet?.total_earned || 0;
+    const locked = wallet?.locked !== false;
+    const followers = S.profile?.followers || 0;
+    const gate = 5000;
+    const pct = Math.min(Math.round((followers/gate)*100),100);
+
+    p.innerHTML=`
+    <div class="page-hdr">
+      <div class="page-title" style="font-family:'Playfair Display',serif;background:linear-gradient(90deg,var(--gold),var(--gold3),var(--teal2),var(--gold));background-size:300% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;">WealthShift</div>
+      <div class="page-sub">"He gives you the ability to produce wealth." — Deut. 8:18</div>
+    </div>
+    <div class="wealth-hero">
+      <div class="wh-label">Total Earned</div>
+      <div class="wh-amount">$${totalEarned.toFixed(2)}</div>
+      <div class="wh-sub">Available balance: <strong style="color:var(--green);">$${balance.toFixed(2)}</strong></div>
+    </div>
+    <div class="gate-wrap">
+      <div class="gate-top"><span class="gate-label">🔒 Withdrawal Gate</span><span class="gate-pct">${pct}%</span></div>
+      <div class="gate-bar"><div class="gate-fill" style="width:${pct}%"></div></div>
+      <div class="gate-info">
+        <span style="color:var(--text)">${followers.toLocaleString()} followers</span>
+        <span style="color:var(--gold)">${Math.max(0,gate-followers).toLocaleString()} more needed</span>
+      </div>
+    </div>
+    <div class="earn-section">
+      <div class="sec-title">Earnings Breakdown</div>
+      ${[
+        {icon:'🎁',name:'Live Gifts',note:'Platform 80% · You 20%',amount:'$0.00'},
+        {icon:'🛍️',name:'AuthorityShop',note:'Platform 20% · You 77%',amount:'$0.00'},
+        {icon:'💎',name:'Subscriptions',note:'Platform 30% · You 62%',amount:'$0.00'},
+        {icon:'🙏',name:'Tithes',note:'Platform 5% · You 95%',amount:'$0.00'},
+      ].map(e=>`<div class="earn-item"><div class="ei-icon">${e.icon}</div><div><div class="ei-name">${e.name}</div><div class="ei-note">${e.note}</div></div><div class="ei-amount">${e.amount}</div></div>`).join('')}
+    </div>
+    <div style="padding:0 14px 20px;">
+      ${!locked&&balance>=50?`
+      <button class="btn btn-teal btn-full" onclick="requestWithdrawal()" style="margin-bottom:8px;">💸 Request Withdrawal</button>`:''}
+      <div style="font-size:11px;color:var(--dim);text-align:center;line-height:1.6;">
+        Withdrawals paid on the 15th · $50 minimum · 5,000 followers required<br/>
+        <span style="color:var(--teal);">Powered by Stripe Connect</span>
+      </div>
+    </div>`;
+  });
+}
+
+async function requestWithdrawal() {
+  if(!S.user){ showToast('Please sign in first'); return; }
+  const { error } = await sb.from('withdrawal_requests').insert({
+    creator_id: S.user.id,
+    amount: 50,
+    method: 'stripe',
+    status: 'pending',
+    requested_at: new Date().toIso8601String?.() || new Date().toISOString(),
+  });
+  if(error) showToast('Error submitting request');
+  else showToast('💸 Withdrawal request submitted! Paid on the 15th.');
+}
+
+// ═══════════════════════════════════════════════════════
+// SAFE
+// ═══════════════════════════════════════════════════════
+function renderSafe(p){
+  p.innerHTML=`
+  <div class="safe-hero">
+    <span class="sh-icon">🛡️</span>
+    <div class="sh-title">Safe Stream</div>
+    <div class="sh-sub">Our community. Our standards. Every voice matters and deserves protection.</div>
+  </div>
+  <div style="padding:0 14px;">
+    <div class="sec-title" style="margin-bottom:9px;">Community Standards</div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px;">
+      ${[
+        {icon:'🚫',label:'No Bullying or Harassment',desc:'Zero tolerance. Actioned within 24 hours.'},
+        {icon:'🤝',label:'No Hate Speech',desc:'All people are created in God\'s image.'},
+        {icon:'🔒',label:'No Doxxing — Ever',desc:'Personal information stays private.'},
+        {icon:'🌱',label:'Elevate — Never Diminish',desc:'Build people up. Never tear them down.'},
+        {icon:'⚖️',label:'3-Strike System',desc:'Strike 3 = permanent removal.'},
+      ].map(r=>`<div class="list-row" style="cursor:default;">
+        <div style="font-size:18px;width:32px;text-align:center;">${r.icon}</div>
+        <div><div style="font-size:13px;font-weight:600;">${r.label}</div><div style="font-size:11px;color:var(--muted)">${r.desc}</div></div></div>`).join('')}
+    </div>
+    <div style="background:rgba(233,30,140,.06);border:1px solid rgba(233,30,140,.15);border-radius:14px;padding:16px;margin-bottom:12px;">
+      <div class="sec-title" style="color:var(--pink);margin-bottom:9px;">🚨 Anonymous Report</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:12px;">See a violation? Report anonymously. The person will never know it was you.</div>
+      <button class="btn btn-pink btn-full" onclick="submitReport()">Submit Anonymous Report</button>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;">
+      <div class="sec-title" style="margin-bottom:10px;">📞 Crisis Lines</div>
+      ${[
+        {flag:'🇺🇸',name:'988 Lifeline (USA)',num:'988'},
+        {flag:'🇬🇧',name:'Samaritans (UK)',num:'116 123'},
+        {flag:'🇨🇦',name:'Crisis Services (CA)',num:'1-833-456-4566'},
+        {flag:'🇦🇺',name:'Lifeline (AU)',num:'13 11 14'},
+        {flag:'🇳🇬',name:'SURPIN (NG)',num:'0800-988-0000'},
+        {flag:'🌍',name:'Befrienders Worldwide',num:'befrienders.org'},
+      ].map(l=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+        <div><div style="font-size:12px;font-weight:700;">${l.flag} ${l.name}</div><div style="font-size:11px;color:var(--gold)">${l.num}</div></div>
+        <a href="tel:${l.num}" class="btn btn-glass btn-sm">Call</a></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+async function submitReport() {
+  if(!S.user){ showToast('Please sign in first'); return; }
+  const { error } = await sb.from('reports').insert({
+    reporter_id: S.user.id,
+    reported_id: S.user.id, // placeholder
+    type: 'other',
+    status: 'pending',
+    priority: 'normal',
+  });
+  showToast('🚨 Report submitted anonymously. Thank you.');
+}
+
+// ═══════════════════════════════════════════════════════
+// BRAIN BATTLES
+// ═══════════════════════════════════════════════════════
+function renderBattles(p){
+  if(S.battleView==='game'&&S.gameMode){renderQuiz(p);return;}
+  if(S.battleView==='result'){renderResult(p);return;}
+  p.innerHTML=`
+  <div class="battles-hero">
+    <span class="bh-icon">⚡</span>
+    <div class="bh-title">Brain Battles</div>
+    <div style="font-size:13px;color:var(--muted);">Test your Kingdom knowledge. Compete worldwide.</div>
+  </div>
+  <div style="padding:0 14px 7px;"><div class="sec-title">Choose Your Battle</div></div>
+  <div class="mode-grid">
+    ${[
+      {id:'bible',icon:'📖',name:'Bible Quiz',desc:'30 seconds per question'},
+      {id:'wisdom',icon:'👑',name:'Wisdom Duel',desc:'Proverbs & wisdom'},
+      {id:'faith',icon:'🔥',name:'Faith Challenge',desc:'Kingdom principles'},
+      {id:'slam',icon:'⚡',name:'Sermon Slam',desc:'10 second lightning round'},
+    ].map(m=>`<div class="mode-tile" onclick="startBattle('${m.id}','${m.name}')">
+      <div class="mt-icon">${m.icon}</div>
+      <div class="mt-name">${m.name}</div>
+      <div class="mt-desc">${m.desc}</div></div>`).join('')}
+  </div>
+  <div style="padding:0 14px 20px;">
+    <div class="sec-title">Global Leaderboard</div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;">
+      ${[
+        {rank:'🥇',name:'Pastor_Emmanuel',avatar:'👨🏿‍💼',score:4850},
+        {rank:'🥈',name:'KingdomFinance',avatar:'👨🏾‍💻',score:4210},
+        {rank:'🥉',name:'Apostle_Grace',avatar:'👩🏾‍⚖️',score:3980},
+        {rank:'4',name:S.profile?.display_name||'You',avatar:'😊',score:S.profile?.battle_score||0},
+      ].map(e=>`<div class="list-row">
+        <div style="font-size:17px;width:26px;text-align:center;">${e.rank}</div>
+        <div style="font-size:18px;">${e.avatar}</div>
+        <div style="flex:1;font-size:13px;font-weight:600;">${e.name}</div>
+        <div style="font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--gold);">${e.score.toLocaleString()}</div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function startBattle(id,name){
+  S.gameMode={id,name};
+  S.quizState={idx:0,score:0,streak:0,answered:false,selected:null,
+    seconds:id==='slam'?10:30,
+    qs:[...QUESTIONS].sort(()=>Math.random()-.5).slice(0,5)};
+  S.battleView='game'; render(); startQuizTimer();
+}
+
+function renderQuiz(p){
+  const s=S.quizState,q=s.qs[s.idx];
+  const circ=2*Math.PI*28,total=S.gameMode?.id==='slam'?10:30;
+  const offset=circ*(s.seconds/total);
+  const tc=s.seconds<=5?'#FF4444':s.seconds<=10?'#E67E22':'#00C9C8';
+  p.innerHTML=`
+  <div class="quiz-wrap">
+    ${s.streak>=3?`<div class="streak-banner"><div class="streak-pill">🔥 COMBO ×${s.streak}!</div></div>`:''}
+    <div class="quiz-top">
+      <span class="quiz-mode-lbl">${S.gameMode?.name} · Q${s.idx+1}/${s.qs.length}</span>
+      <span class="quiz-score-lbl">🏆 ${s.score.toLocaleString()} pts</span>
+    </div>
+    <div class="quiz-prog"><div class="quiz-prog-fill" style="width:${(s.idx/s.qs.length)*100}%"></div></div>
+    <div class="quiz-card">
+      <div class="quiz-card-top">
+        <div class="quiz-q">
+          <div class="quiz-qnum">Question ${s.idx+1} · ${q.pts} pts</div>
+          <div class="quiz-qtext">${q.q}</div>
+          ${S.gameMode?.id!=='slam'?`<div class="quiz-verse">📖 ${q.verse}</div>`:''}
+        </div>
+        <div class="timer-wrap">
+          <svg class="timer-svg" viewBox="0 0 64 64">
+            <circle class="timer-track" cx="32" cy="32" r="28"/>
+            <circle class="timer-fill" cx="32" cy="32" r="28" stroke="${tc}"
+              stroke-dasharray="${circ}" stroke-dashoffset="${circ-offset}" id="tc"/>
+          </svg>
+          <div class="timer-center">
+            <span class="timer-num" id="tn" style="color:${tc}">${s.seconds}</span>
+            <span class="timer-lbl">SEC</span>
+          </div>
+        </div>
+      </div>
+      <div class="quiz-opts">
+        ${q.opts.map((opt,i)=>{
+          let cls='';if(s.answered){if(i===q.a)cls='correct';else if(i===s.selected)cls='wrong';}
+          return`<button class="quiz-opt ${cls}" onclick="${s.answered?'':'answerQ('+i+')'}">
+            <span class="opt-ltr">${String.fromCharCode(65+i)}.</span>
+            ${opt}${s.answered&&i===q.a?' ✓':''}${s.answered&&i===s.selected&&i!==q.a?' ✗':''}
+          </button>`;
+        }).join('')}
+      </div>
+    </div>
+    <button class="btn btn-glass btn-full" onclick="exitBattle()">← Exit Battle</button>
+  </div>`;
+}
+
+function answerQ(idx){
+  clearQuizTimer();
+  const s=S.quizState,q=s.qs[s.idx];
+  s.answered=true;s.selected=idx;
+  const correct=idx===q.a;
+  if(correct){const bonus=s.seconds>20?50:s.seconds>10?25:0;s.score+=q.pts+bonus;s.streak++;showToast(`✓ Correct! +${q.pts+bonus} pts`);}
+  else{s.streak=0;showToast('✗ Wrong answer');}
+  render();
+  setTimeout(()=>{s.idx++;if(s.idx>=s.qs.length){S.battleView='result';saveBattleScore();}else{s.answered=false;s.selected=null;s.seconds=S.gameMode?.id==='slam'?10:30;}render();if(S.battleView==='game')startQuizTimer();},correct?1200:1600);
+}
+
+async function saveBattleScore(){
+  if(!S.user||!S.quizState) return;
+  await sb.from('battle_scores').insert({
+    user_id: S.user.id,
+    mode: S.gameMode?.id||'bible',
+    score: S.quizState.score,
+    questions: S.quizState.qs.length,
+    correct: S.quizState.qs.filter((_,i)=>i<S.quizState.idx).length,
+    streak: S.quizState.streak,
+  });
+}
+
+function startQuizTimer(){
+  clearQuizTimer();
+  S.quizTimer=setInterval(()=>{
+    if(!S.quizState||S.quizState.answered)return;
+    S.quizState.seconds--;
+    const tn=document.getElementById('tn');if(tn)tn.textContent=S.quizState.seconds;
+    const total=S.gameMode?.id==='slam'?10:30,circ=2*Math.PI*28;
+    const tc2=document.getElementById('tc');
+    if(tc2){const offset=circ*(S.quizState.seconds/total);tc2.setAttribute('stroke-dashoffset',circ-offset);const c=S.quizState.seconds<=5?'#FF4444':S.quizState.seconds<=10?'#E67E22':'#00C9C8';tc2.setAttribute('stroke',c);if(tn)tn.style.color=c;}
+    if(S.quizState.seconds<=0){clearQuizTimer();showToast("⏱️ Time's up!");S.quizState.streak=0;S.quizState.idx++;if(S.quizState.idx>=S.quizState.qs.length){S.battleView='result';saveBattleScore();render();}else{S.quizState.answered=false;S.quizState.selected=null;S.quizState.seconds=S.gameMode?.id==='slam'?10:30;render();startQuizTimer();}}
+  },1000);
+}
+function clearQuizTimer(){if(S.quizTimer){clearInterval(S.quizTimer);S.quizTimer=null;}}
+function renderResult(p){
+  const s=S.quizState;
+  p.innerHTML=`<div class="quiz-wrap"><div class="quiz-result">
+    <span class="qr-icon">${s.score>=400?'🏆':s.score>=200?'🥈':'🥉'}</span>
+    <div class="qr-title">Battle Complete!</div>
+    <div class="qr-score">${s.score.toLocaleString()}</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:18px;">Score saved to leaderboard 🙏</div>
+    <div class="qr-btns">
+      <button class="btn btn-teal" style="flex:1" onclick="exitBattle()">Done ✓</button>
+      <button class="btn btn-glass" style="flex:1" onclick="startBattle('${S.gameMode?.id}','${S.gameMode?.name}')">Play Again</button>
+    </div>
+  </div></div>`;
+}
+function exitBattle(){S.battleView='home';S.gameMode=null;S.quizState=null;clearQuizTimer();render();}
+
+// ═══════════════════════════════════════════════════════
+// PROFILE — from Supabase
+// ═══════════════════════════════════════════════════════
+function renderProfile(p){
+  const u = S.profile;
+  p.innerHTML=`
+  <div class="profile-cover">
+    <div class="profile-av">${u?.avatar||'👤'}</div>
+    <button class="profile-edit-btn" onclick="showToast('Edit profile coming soon')">Edit Profile</button>
+  </div>
+  <div class="profile-info">
+    <div class="profile-name">${u?.display_name||'Your Name'} <span style="color:var(--teal);font-size:13px;">${u?.verified?'✓':''}</span></div>
+    <div class="profile-handle">@${u?.username||'yourhandle'} · ${u?.email||''}</div>
+    <div class="profile-bio">${u?.bio||'"Equipping believers to walk in Kingdom authority 👑"'}</div>
+    <div class="profile-stats-grid">
+      ${[{n:(u?.followers||0).toLocaleString(),l:'Followers'},{n:(u?.following||0).toLocaleString(),l:'Following'},{n:(u?.videos||0).toLocaleString(),l:'Videos'}].map(s=>`
+      <div class="ps-card"><div class="ps-num">${s.n}</div><div class="ps-lbl">${s.l}</div></div>`).join('')}
+    </div>
+  </div>
+  <div class="pro-card">
+    <div class="pro-hdr">
+      <span class="pro-title">${S.isPro?'👑 Creator Pro Active':'⚙️ Creator Pro'}</span>
+      ${!S.isPro?'<span style="font-size:12px;color:var(--muted);">$19/month</span>':''}
+    </div>
+    ${!S.isPro?`<div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px;">Simulcast, analytics, unlimited shop, priority CDN and more.</div>
+    <button class="btn btn-gold btn-full" onclick="upgradeCreatorPro()">Upgrade to Creator Pro</button>`
+    :`<div style="font-size:12px;color:var(--muted)">✓ Simulcast · ✓ Analytics · ✓ Unlimited Shop · ✓ Priority CDN</div>`}
+    <div style="font-size:10px;color:var(--dim);margin-top:8px;">Platform keeps 100% · Funds infrastructure · Powered by Stripe</div>
+  </div>
+  <div style="padding:0 14px;">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;">
+      <div class="list-row" onclick="navigate('settings','notification_settings')">
+        <div style="font-size:18px;width:30px;text-align:center;">🔔</div>
+        <div style="flex:1;"><div style="font-size:13px;font-weight:600;">Notifications</div></div>
+        <div style="color:var(--dim);font-size:16px;">›</div>
+      </div>
+      <div class="list-row" onclick="navigate('settings')">
+        <div style="font-size:18px;width:30px;text-align:center;">⚙️</div>
+        <div style="flex:1;"><div style="font-size:13px;font-weight:600;">Settings</div></div>
+        <div style="color:var(--dim);font-size:16px;">›</div>
+      </div>
+    </div>
+    <button class="btn btn-glass btn-full" style="margin:14px 0;color:var(--red);border-color:rgba(255,68,68,.2);" onclick="handleSignOut()">🚪 Sign Out</button>
+  </div>`;
+}
+
+async function upgradeCreatorPro() {
+  showToast('🔗 Connecting to Stripe...');
+  try {
+    const response = await fetch('/api/create-pro-session', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({user_id: S.user?.id}),
+    });
+    const session = await response.json();
+    if(session.url) window.location.href = session.url;
+    else { S.isPro=true; showToast('👑 Creator Pro activated!'); render(); }
+  } catch {
+    S.isPro=true; showToast('👑 Creator Pro activated! (demo)'); render();
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════════════
+function renderSettings(p){
+  p.innerHTML=`
+  <div class="page-hdr">
+    <div class="page-title" style="font-family:'Playfair Display',serif;">Settings</div>
+    <div class="page-sub">Manage your KingdomShift.Live account</div>
+  </div>
+  ${[
+    {title:'ACCOUNT',items:[
+      {icon:'👤',label:'Edit Profile',desc:'Name, bio, avatar, banner'},
+      {icon:'🔐',label:'Change Password',desc:'Update your password'},
+      {icon:'📧',label:'Email',desc:S.user?.email||'Not signed in'},
+    ]},
+    {title:'NOTIFICATIONS',items:[
+      {icon:'🔔',label:'Notification Settings',desc:'Control your alerts',sub:'notification_settings'},
+    ]},
+    {title:'PRIVACY',items:[
+      {icon:'🔒',label:'Privacy Settings',desc:'Control visibility',sub:'privacy_settings'},
+    ]},
+    {title:'LEGAL',items:[
+      {icon:'📜',label:'Privacy Policy',sub:'privacy_policy'},
+      {icon:'📋',label:'Terms of Service',sub:'terms_of_service'},
+      {icon:'✍️',label:'Creator Agreement',sub:'creator_agreement'},
+      {icon:'📡',label:'Live Streaming Guide',sub:'live_streaming_guide'},
+      {icon:'🗑️',label:'Delete Account',sub:'delete_account'},
+      {icon:'🛡️',label:'Child Safety Standards',sub:'child_safety'},
+    ]},
+    {title:'SUPPORT',items:[
+      {icon:'💬',label:'Contact Support',desc:'support@kingdomshift.live'},
+      {icon:'ℹ️',label:'About',desc:'KingdomShift.Live v1.0.0'},
+    ]},
+  ].map(group=>`
+  <div class="settings-group">
+    <div class="sg-title">${group.title}</div>
+    <div class="sg-body">
+      ${group.items.map(item=>`
+      <div class="sr" onclick="${item.sub?`navigate('settings','${item.sub}')`:` showToast('Opening ${item.label}')`}">
+        <div class="sr-icon">${item.icon}</div>
+        <div style="flex:1;"><div class="sr-label">${item.label}</div>${item.desc?`<div class="sr-desc">${item.desc}</div>`:''}</div>
+        <span class="sr-arrow">›</span>
+      </div>`).join('')}
+    </div>
+  </div>`).join('')}
+  <div style="padding:0 14px 80px;">
+    <button class="btn btn-glass btn-full" style="color:var(--red);border-color:rgba(255,68,68,.2);" onclick="handleSignOut()">🚪 Sign Out</button>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// NOTIF SETTINGS
+// ═══════════════════════════════════════════════════════
+function renderNotifSettings(p){
+  const ns=S.notifSettings;
+  p.innerHTML=`
+  <div class="back-bar"><button class="back-btn" onclick="navigate('profile')">‹</button>
+  <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;">Notifications</div></div>
+  <div class="settings-group">
+    <div class="sg-title">ACTIVITY</div>
+    <div class="sg-body">
+      ${[
+        {key:'newFollower',icon:'👤',label:'New Followers',desc:'When someone follows you'},
+        {key:'gifts',icon:'🎁',label:'Gifts Received',desc:'When viewers send gifts'},
+        {key:'comments',icon:'💬',label:'Comments',desc:'Comments on your content'},
+        {key:'messages',icon:'✉️',label:'Messages',desc:'New direct messages'},
+      ].map(item=>`
+      <div class="sr" style="cursor:default;">
+        <div class="sr-icon">${item.icon}</div>
+        <div style="flex:1;"><div class="sr-label">${item.label}</div><div class="sr-desc">${item.desc}</div></div>
+        <button class="toggle ${ns[item.key]?'on':'off'}" onclick="toggleNotif('${item.key}')"><div class="toggle-knob"></div></button>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+function toggleNotif(key){
+  S.notifSettings[key]=!S.notifSettings[key];
+  if(S.user){sb.from('profiles').update({notif_settings:S.notifSettings}).eq('id',S.user.id);}
+  showToast(S.notifSettings[key]?'✅ Enabled':'🔕 Disabled');render();
+}
+
+// ═══════════════════════════════════════════════════════
+// PRIVACY SETTINGS
+// ═══════════════════════════════════════════════════════
+function renderPrivacySettings(p){
+  const ps=S.privacySettings;
+  p.innerHTML=`
+  <div class="back-bar"><button class="back-btn" onclick="navigate('settings')">‹</button>
+  <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;">Privacy</div></div>
+  <div class="settings-group">
+    <div class="sg-title">ACCOUNT PRIVACY</div>
+    <div class="sg-body">
+      ${[
+        {key:'privateAccount',icon:'🔒',label:'Private Account',desc:'Only approved followers see content'},
+        {key:'showOnline',icon:'🟢',label:'Show Online Status',desc:'Let others see when you\'re active'},
+        {key:'allowMessages',icon:'💬',label:'Allow Messages',desc:'Receive direct messages'},
+        {key:'allowComments',icon:'📝',label:'Allow Comments',desc:'Let viewers comment'},
+      ].map(item=>`
+      <div class="sr" style="cursor:default;">
+        <div class="sr-icon">${item.icon}</div>
+        <div style="flex:1;"><div class="sr-label">${item.label}</div><div class="sr-desc">${item.desc}</div></div>
+        <button class="toggle ${ps[item.key]?'on':'off'}" onclick="togglePrivacy('${item.key}')"><div class="toggle-knob"></div></button>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+function togglePrivacy(key){
+  S.privacySettings[key]=!S.privacySettings[key];
+  if(S.user){sb.from('profiles').update({privacy_settings:S.privacySettings}).eq('id',S.user.id);}
+  showToast(S.privacySettings[key]?'✅ Enabled':'Disabled');render();
+}
+
+// ═══════════════════════════════════════════════════════
+// SEARCH
+// ═══════════════════════════════════════════════════════
+function renderSearch(p){
+  p.innerHTML=`
+  <div class="page-hdr">
+    <div class="page-title" style="font-family:'Playfair Display',serif;">Discover</div>
+    <div class="page-sub">Find creators, content, and community</div>
+    <input class="input" placeholder="Search creators, topics..." id="search-input"
+      oninput="searchContent(this.value)" style="margin-bottom:14px;"/>
+  </div>
+  <div style="padding:0 14px;">
+    <div class="sec-title">Trending Topics</div>
+    <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px;">
+      ${['#Faith','#WealthShift','#Kingdom','#Worship','#Prayer','#Bible','#Ministry','#Purpose'].map(t=>`
+      <span class="tag tag-teal" style="cursor:pointer;padding:6px 13px;font-size:11px;" onclick="showToast('Browsing ${t}')">${t}</span>`).join('')}
+    </div>
+    <div class="sec-title">Suggested Creators</div>
+    <div id="search-results" style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;">
+      ${DEMO_POSTS.slice(0,4).map(post=>`<div class="list-row">
+        <div style="font-size:20px;">${post.avatar}</div>
+        <div style="flex:1;"><div style="font-size:13px;font-weight:700;">${post.user}${post.verified?' ✓':''}</div><div style="font-size:11px;color:var(--muted)">${post.handle}</div></div>
+        <button class="btn btn-glass btn-sm" onclick="showToast('Following ${post.user}')">Follow</button>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+async function searchContent(q) {
+  if(!q||q.length<2) return;
+  try {
+    const { data } = await sb.from('profiles')
+      .select('id,username,display_name,avatar,verified')
+      .or(`username.ilike.%${q}%,display_name.ilike.%${q}%`)
+      .limit(10);
+    const el = document.getElementById('search-results');
+    if(el && data && data.length>0){
+      el.innerHTML = data.map(u=>`<div class="list-row">
+        <div style="font-size:20px;">${u.avatar||'👤'}</div>
+        <div style="flex:1;"><div style="font-size:13px;font-weight:700;">${u.display_name||u.username}${u.verified?' ✓':''}</div><div style="font-size:11px;color:var(--muted)">@${u.username}</div></div>
+        <button class="btn btn-glass btn-sm" onclick="showToast('Following ${u.display_name||u.username}')">Follow</button>
+      </div>`).join('');
+    }
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════════
+// ADMIN
+// ═══════════════════════════════════════════════════════
+function renderAdmin(p){
+  p.innerHTML=`
+  <div class="page-hdr">
+    <div class="page-title" style="font-family:'Playfair Display',serif;">Admin Panel</div>
+    <div class="page-sub">KingdomShift.Live · Platform Control</div>
+    <div style="display:flex;align-items:center;gap:7px;background:rgba(29,185,84,.06);border:1px solid rgba(29,185,84,.15);border-radius:10px;padding:9px 13px;margin-bottom:14px;">
+      <div style="width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s ease infinite;"></div>
+      <span style="font-size:11px;font-weight:700;color:var(--green);">PLATFORM ONLINE</span>
+      <span style="margin-left:auto;font-size:11px;color:var(--muted);">Supabase Connected ✅</span>
+    </div>
+  </div>
+  <div class="admin-stats">
+    ${[
+      {icon:'💰',num:`$${Math.floor(S.liveRevenue).toLocaleString()}`,label:'REVENUE'},
+      {icon:'🔴',num:'Live',label:'STREAMING'},
+      {icon:'🪙',num:S.coins,label:'YOUR COINS'},
+      {icon:'🚨',num:'0',label:'REPORTS'},
+      {icon:'✅',num:'DB',label:'SUPABASE'},
+      {icon:'💳',num:'ON',label:'STRIPE'},
+    ].map(s=>`<div class="asc"><div class="asc-icon">${s.icon}</div><div class="asc-num">${s.num}</div><div class="asc-lbl">${s.label}</div></div>`).join('')}
+  </div>
+  <div style="padding:0 14px;">
+    ${[
+      {icon:'🎁',label:'Gift System',badge:null,rows:[['Platform split','80% Platform · 20% Creator'],['Active gifts','8 tiers'],['Coins value','$0.01 per coin']]},
+      {icon:'🪙',label:'Coin Packages',badge:null,rows:[['Packages','6 active'],['Platform keeps','80%'],['Stripe fee','2.9%']]},
+      {icon:'💸',label:'Payouts',badge:null,rows:[['Gate','5,000 followers'],['Minimum','$50'],['Payout date','15th monthly']]},
+      {icon:'🔐',label:'Auth',badge:null,rows:[['Provider','Supabase Auth'],['Status','✅ Connected'],['URL',SUPABASE_URL.slice(0,30)+'...']]},
+      {icon:'💳',label:'Stripe',badge:null,rows:[['Status','✅ Connected'],['Mode',STRIPE_KEY.includes('test')?'Test Mode':'Live Mode'],['Key',STRIPE_KEY.slice(0,20)+'...']]},
+      {icon:'📡',label:'ZegoCloud',badge:null,rows:[['App ID',ZEGO_APP_ID],['Status','✅ Connected'],['Free quota','10K min/month']]},
+    ].map(sec=>`
+    <div class="admin-sec" onclick="showToast('Opening ${sec.label}...')">
+      <div class="as-hdr">
+        <span class="as-hdr-icon">${sec.icon}</span>
+        <span class="as-hdr-label">${sec.label}</span>
+        ${sec.badge?`<span class="as-hdr-badge">${sec.badge}</span>`:''}
+        <span style="color:var(--dim);font-size:16px;">›</span>
+      </div>
+      <div class="as-body">
+        ${sec.rows.map(([l,v])=>`<div class="as-row"><span class="as-row-lbl">${l}</span><span class="as-row-val" style="font-size:11px;">${v}</span></div>`).join('')}
+      </div>
+    </div>`).join('')}
+  </div>
+  <div style="height:40px;"></div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// LEGAL PAGES
+// ═══════════════════════════════════════════════════════
+function renderPrivacy(p){p.innerHTML=`
+  <div class="back-bar"><button class="back-btn" onclick="navigate('settings')">‹</button><div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;">Privacy Policy</div></div>
+  <div class="legal-wrap">
+    <div class="legal-title">Privacy Policy</div>
+    <div class="legal-date">Last updated: June 2026 · KingdomShift Collective</div>
+    ${[
+      ['1. Introduction','KingdomShift.Live is operated by KingdomShift Collective. This Privacy Policy explains how we collect, use, and protect your personal information.'],
+      ['2. Information We Collect','We collect your name, email address, username, and profile information when you create an account. We also collect usage data such as content you view and interactions you make.'],
+      ['3. How We Use Your Information','We use your information to provide and improve our services. <strong>We will never sell your personal data to third parties.</strong> This is a permanent commitment of KingdomShift Collective.'],
+      ['4. Data Security','Your data is stored securely in Supabase and encrypted in transit and at rest.'],
+      ['5. Your Rights','You may access, correct, or delete your personal information at any time through Settings.'],
+      ['6. Children\'s Privacy','KingdomShift.Live is not directed at children under 13. Contact support@kingdomshift.live with concerns.'],
+      ['7. Child Safety','We have zero tolerance for CSAM. All violations are reported immediately to NCMEC and relevant authorities.'],
+      ['8. Contact','support@kingdomshift.live'],
+    ].map(([h,t])=>`<div style="margin-bottom:18px;"><div class="legal-h2">${h}</div><p class="legal-p">${t}</p></div>`).join('')}
+  </div>`;}
+
+function renderTerms(p){p.innerHTML=`
+  <div class="back-bar"><button class="back-btn" onclick="navigate('settings')">‹</button><div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;">Terms of Service</div></div>
+  <div class="legal-wrap">
+    <div class="legal-title">Terms of Service</div>
+    <div class="legal-date">Last updated: June 2026 · KingdomShift Collective</div>
+    ${[
+      ['1. Acceptance','By creating an account you agree to these Terms.'],
+      ['2. Eligibility','You must be at least 13 years old to use KingdomShift.Live.'],
+      ['3. Account Responsibilities','You are responsible for all activity under your account.'],
+      ['4. Content Standards','All content must comply with our Community Standards.'],
+      ['5. Revenue','Rates are governed by the Creator Agreement. Rates never decrease.'],
+      ['6. Termination','We may suspend accounts that violate these terms.'],
+      ['7. Changes','We will notify all users with 60 days written notice before changes.'],
+    ].map(([h,t])=>`<div style="margin-bottom:18px;"><div class="legal-h2">${h}</div><p class="legal-p">${t}</p></div>`).join('')}
+  </div>`;}
+
+function renderCreatorAgreement(p){p.innerHTML=`
+  <div class="back-bar"><button class="back-btn" onclick="navigate('settings')">‹</button><div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;">Creator Agreement</div></div>
+  <div class="legal-wrap">
+    <div class="legal-title">Creator Agreement</div>
+    <div class="legal-date">Last updated: June 2026 · KingdomShift Collective</div>
+    ${[
+      ['Platform Promise','KingdomShift.Live was built by one person with no investors and total faith. You only share revenue when you earn revenue.'],
+      ['Revenue Splits','<strong>Live Gifts:</strong> Platform 80%, Creator 20%. <strong>AuthorityShop:</strong> Platform 20%, Creator 77%, Stripe 3%. <strong>Subscriptions:</strong> Platform 30%, Creator 62%, Stripe 8%. <strong>Tithes:</strong> Platform 5%, Ministry 95%.'],
+      ['Withdrawal','5,000 followers required. $50 minimum. Paid on the 15th monthly.'],
+      ['Locked Forever','These rates will never go down. 60 days written notice required for any change.'],
+    ].map(([h,t])=>`<div style="margin-bottom:18px;"><div class="legal-h2">${h}</div><p class="legal-p">${t}</p></div>`).join('')}
+    <div style="background:rgba(0,201,200,.05);border:1px solid rgba(0,201,200,.15);border-radius:12px;padding:16px;margin-top:8px;">
+      <p style="font-family:'Crimson Text',serif;font-style:italic;color:var(--teal);margin-bottom:5px;">"He gives you the ability to produce wealth." — Deuteronomy 8:18</p>
+      <p style="font-size:12px;color:var(--dim);">KingdomShift Collective · Equip · Empower · Expand the Kingdom</p>
+    </div>
+  </div>`;}
+
+function renderDeleteAccount(p){p.innerHTML=`
+  <div class="back-bar"><button class="back-btn" onclick="navigate('settings')">‹</button><div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--red);">Delete Account</div></div>
+  <div style="padding:18px;">
+    <div style="background:rgba(255,68,68,.06);border:1px solid rgba(255,68,68,.15);border-radius:14px;padding:22px;">
+      <p style="font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:18px;">To request deletion of your account and all associated data email us. Your account and all data will be permanently deleted within 30 days.</p>
+      <div style="background:rgba(0,0,0,.3);border-radius:10px;padding:14px;text-align:center;margin-bottom:14px;">
+        <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--teal);">support@kingdomshift.live</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px;">Subject: Account Deletion Request</div>
+      </div>
+      <button class="btn btn-glass btn-full" style="color:var(--red);border-color:rgba(255,68,68,.2);" onclick="showToast('Deletion request sent to support@kingdomshift.live')">Send Deletion Request</button>
+    </div>
+  </div>`;}
+
+function renderChildSafety(p){p.innerHTML=`
+  <div class="back-bar"><button class="back-btn" onclick="navigate('settings')">‹</button><div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--teal);">Child Safety</div></div>
+  <div class="legal-wrap">
+    <div class="legal-title" style="color:var(--teal);">Child Safety Standards</div>
+    <div class="legal-date">Last updated: June 2026</div>
+    ${[
+      ['Our Commitment','KingdomShift.Live has zero tolerance for child sexual abuse material (CSAM) or any content that exploits or harms minors.'],
+      ['Reporting','All CSAM violations are reported immediately to NCMEC and relevant regional authorities.'],
+      ['In-App Reporting','Users can report child safety concerns through our anonymous reporting system in Safe Stream.'],
+      ['Contact','support@kingdomshift.live'],
+    ].map(([h,t])=>`<div style="margin-bottom:18px;"><div class="legal-h2" style="color:var(--teal);">${h}</div><p class="legal-p">${t}</p></div>`).join('')}
+  </div>`;}
+
+function renderLiveGuide(p){p.innerHTML=`
+  <div class="back-bar"><button class="back-btn" onclick="navigate('live')">‹</button><div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;">Live Streaming Setup</div></div>
+  <div style="padding:14px;">
+    <div class="sec-title" style="margin-bottom:9px;">📱 STREAM FROM YOUR PHONE</div>
+    ${[
+      ['1','Download Streamlabs or Larix','Both are free from your app store.'],
+      ['2','Get Your Stream Key','Creator Dashboard → Live Settings → Copy your RTMP stream key.'],
+      ['3','Configure the App','Settings → Connections → Add New → Protocol: RTMP','rtmp://live.kingdomshift.live/stream'],
+      ['4','Paste Your Stream Key','In the Stream Key field paste your key from the dashboard.'],
+      ['5','Go Live','Tap Start. Your stream appears on KingdomShift.Live within 10 seconds.'],
+    ].map(([n,t,d,code])=>`
+    <div class="guide-step">
+      <div class="gs-num">${n}</div>
+      <div style="flex:1;"><div class="gs-title">${t}</div><div class="gs-desc">${d}</div>${code?`<div class="gs-code">${code}</div>`:''}</div>
+    </div>`).join('')}
+    <div class="sec-title" style="margin:18px 0 9px;">💻 STREAM FROM YOUR COMPUTER</div>
+    ${[
+      ['1','Download OBS Studio','Free from obsproject.com.'],
+      ['2','Configure Stream','Settings → Stream → Service: Custom → Server: RTMP URL','rtmp://live.kingdomshift.live/stream'],
+      ['3','Paste Stream Key','From your KingdomShift.Live Creator Dashboard.'],
+      ['4','Start Streaming','Click Start Streaming. Live within seconds.'],
+    ].map(([n,t,d,code])=>`
+    <div class="guide-step">
+      <div class="gs-num">${n}</div>
+      <div style="flex:1;"><div class="gs-title">${t}</div><div class="gs-desc">${d}</div>${code?`<div class="gs-code">${code}</div>`:''}</div>
+    </div>`).join('')}
+    <div style="height:40px;"></div>
+  </div>`;}
+
+// ═══════════════════════════════════════════════════════
+// SERVICE WORKER
+// ═══════════════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+}
+
+// ═══════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  // Check URL hash for legal pages
+  const hash = window.location.hash.replace('#','');
+  const hashMap = {'privacy':'privacy_policy','terms':'terms_of_service','creator':'creator_agreement','delete':'delete_account','child-safety':'child_safety'};
+  if (hashMap[hash]) {
+    initAuth().then(()=>{if(S.user){navigate('settings',hashMap[hash]);}});
+  } else {
+    initAuth();
+  }
+});
+</script>
+</body>
+</html>

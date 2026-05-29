@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "live.kingdomshift.app",
+        "sha256_cert_fingerprints": ["C0:FF:3D:31:D5:30:9B:C2:4F:64:A6:04:E6:40:62:59:4E:42:6A:E1:A7:D5:8E:7F:F4:57:7C:88:91:69:89:CF"]
+      }
+    }]
