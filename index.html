@@ -597,6 +597,7 @@ const NAV_ITEMS=[
   {id:'shop',    icon:'🛍️',label:'AuthorityShop',  section:null},
   {id:'wealth',  icon:'💰',label:'WealthShift',    section:null},
   {id:'battles', icon:'🧠',label:'Brain Battles',  section:null},
+  {id:'twin',    icon:'✨',label:'Kingdom Twin',   section:null},
   {id:'safe',    icon:'🛡️',label:'Safe Stream',    section:'COMMUNITY'},
   {id:'profile', icon:'👤',label:'Profile',         section:'ACCOUNT'},
   {id:'settings',icon:'⚙️',label:'Settings',        section:null},
@@ -842,6 +843,7 @@ function render() {
   const renders={
     feed:renderFeed, live:renderLive, shop:renderShop,
     wealth:renderWealth, safe:renderSafe, battles:renderBattles,
+    twin:renderKingdomTwin,
     profile:renderProfile, settings:renderSettings,
     admin:renderAdmin, search:renderSearch,
   };
@@ -1555,6 +1557,786 @@ function exitBattle(){S.battleView='home';S.gameMode=null;S.quizState=null;clear
 // ═══════════════════════════════════════════════════════
 // PROFILE — from Supabase
 // ═══════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════
+// KINGDOM TWIN
+// ═══════════════════════════════════════════════════════
+function renderKingdomTwin(p){
+  p.innerHTML=`
+    <div style="max-width:960px;margin:0 auto;padding:28px 18px 110px;">
+
+      <div style="text-align:center;margin-bottom:28px;">
+        <div style="
+          width:64px;height:64px;margin:0 auto 14px;
+          border-radius:20px;
+          display:flex;align-items:center;justify-content:center;
+          font-size:30px;
+          background:linear-gradient(135deg,rgba(0,201,200,.18),rgba(212,175,55,.16));
+          border:1px solid rgba(0,201,200,.28);
+          box-shadow:0 0 34px rgba(0,201,200,.12);">
+          ✨
+        </div>
+
+        <div style="
+          font-size:10px;font-weight:800;letter-spacing:.18em;
+          color:var(--teal);margin-bottom:7px;">
+          YOUR DIGITAL LIKENESS
+        </div>
+
+        <h1 style="
+          font-family:'Playfair Display',serif;
+          font-size:clamp(28px,5vw,42px);
+          margin:0 0 9px;">
+          Kingdom Twin
+        </h1>
+
+        <p style="
+          max-width:620px;margin:0 auto;
+          color:var(--muted);font-size:13px;line-height:1.7;">
+          Create an AI-powered digital version of yourself and use your
+          Twin to create videos and content while keeping you in control.
+        </p>
+      </div>
+
+      <div style="
+        background:linear-gradient(135deg,rgba(0,201,200,.09),rgba(212,175,55,.05));
+        border:1px solid rgba(0,201,200,.22);
+        border-radius:20px;padding:24px;
+        margin-bottom:18px;">
+
+        <div style="
+          display:flex;align-items:center;gap:15px;
+          flex-wrap:wrap;">
+
+          <div style="
+            width:54px;height:54px;border-radius:50%;
+            display:flex;align-items:center;justify-content:center;
+            font-size:25px;flex-shrink:0;
+            background:rgba(0,201,200,.10);
+            border:1px solid rgba(0,201,200,.25);">
+            👤
+          </div>
+
+          <div style="flex:1;min-width:200px;">
+            <div style="font-size:17px;font-weight:800;margin-bottom:5px;">
+              Create My Twin
+            </div>
+            <div style="
+              color:var(--muted);font-size:12px;
+              line-height:1.6;">
+              Upload photos or record yourself so Kingdom Twin can begin
+              creating your digital likeness.
+            </div>
+          </div>
+
+          <button class="btn btn-teal"
+            onclick="startTwinCreation()"
+            style="min-height:44px;padding:0 20px;">
+            Create My Twin →
+          </button>
+        </div>
+      </div>
+
+      <div style="
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+        gap:12px;margin-bottom:20px;">
+
+        <button onclick="showTwinLibrary()"
+          style="
+            text-align:left;background:rgba(255,255,255,.025);
+            border:1px solid var(--border);border-radius:16px;
+            padding:19px;color:var(--text);cursor:pointer;
+            font-family:'Montserrat',sans-serif;">
+          <div style="font-size:25px;margin-bottom:10px;">👥</div>
+          <div style="font-size:14px;font-weight:800;margin-bottom:5px;">
+            My Twins
+          </div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.5;">
+            View, manage, update or delete your digital Twins.
+          </div>
+        </button>
+
+        <button onclick="showTwinCreations()"
+          style="
+            text-align:left;background:rgba(255,255,255,.025);
+            border:1px solid var(--border);border-radius:16px;
+            padding:19px;color:var(--text);cursor:pointer;
+            font-family:'Montserrat',sans-serif;">
+          <div style="font-size:25px;margin-bottom:10px;">🎬</div>
+          <div style="font-size:14px;font-weight:800;margin-bottom:5px;">
+            My Creations
+          </div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.5;">
+            Find the videos and content you've created with your Twin.
+          </div>
+        </button>
+      </div>
+
+      <div style="
+        border:1px solid var(--border);border-radius:16px;
+        padding:16px;background:rgba(255,255,255,.018);">
+
+        <div style="
+          display:flex;align-items:flex-start;
+          gap:11px;">
+
+          <div style="font-size:20px;">🛡️</div>
+
+          <div>
+            <div style="
+              font-size:12px;font-weight:800;
+              margin-bottom:4px;">
+              You control your Twin
+            </div>
+
+            <div style="
+              font-size:10px;color:var(--muted);
+              line-height:1.6;">
+              Your likeness should only be created with your consent.
+              You'll be able to manage or delete your Twin from your account.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>`;
+}
+
+function startTwinCreation(){
+  const p=document.getElementById('page');
+  if(!p) return;
+
+  p.innerHTML=`
+    <div style="max-width:760px;margin:0 auto;padding:24px 18px 110px;">
+
+      <button onclick="renderKingdomTwin(document.getElementById('page'))"
+        style="
+          background:none;border:0;color:var(--muted);
+          font-family:'Montserrat',sans-serif;font-size:12px;
+          cursor:pointer;padding:5px 0;margin-bottom:20px;">
+        ← Back to Kingdom Twin
+      </button>
+
+      <div style="margin-bottom:24px;">
+        <div style="
+          color:var(--teal);font-size:9px;font-weight:800;
+          letter-spacing:.16em;margin-bottom:7px;">
+          CREATE MY TWIN · STEP 1 OF 4
+        </div>
+
+        <h2 style="
+          font-family:'Playfair Display',serif;
+          font-size:30px;margin:0 0 8px;">
+          Create Your Digital Twin
+        </h2>
+
+        <p style="
+          color:var(--muted);font-size:12px;
+          line-height:1.7;margin:0;">
+          Before creating your Twin, confirm that you are providing
+          media of yourself and that you authorize KingdomShift.Live
+          to use the media you submit for your requested Twin creation.
+        </p>
+      </div>
+
+      <div style="
+        border:1px solid rgba(0,201,200,.22);
+        background:rgba(0,201,200,.045);
+        border-radius:18px;padding:20px;
+        margin-bottom:18px;">
+
+        <div style="
+          display:flex;gap:12px;
+          align-items:flex-start;margin-bottom:16px;">
+          <div style="font-size:25px;">🛡️</div>
+          <div>
+            <div style="font-size:14px;font-weight:800;margin-bottom:4px;">
+              Your likeness. Your permission.
+            </div>
+            <div style="
+              color:var(--muted);font-size:11px;
+              line-height:1.6;">
+              Only upload or record media that you have the right
+              to use. Creating a Twin of another person without
+              their authorization is not permitted.
+            </div>
+          </div>
+        </div>
+
+        <label style="
+          display:flex;align-items:flex-start;gap:11px;
+          cursor:pointer;background:rgba(255,255,255,.025);
+          border:1px solid var(--border);
+          border-radius:12px;padding:14px;">
+
+          <input id="twin-consent" type="checkbox"
+            onchange="updateTwinConsent()"
+            style="
+              width:18px;height:18px;
+              accent-color:var(--teal);
+              margin-top:1px;flex-shrink:0;">
+
+          <span style="
+            font-size:11px;line-height:1.6;
+            color:var(--text);">
+            I confirm that I am creating a Twin of myself,
+            the media I provide is mine or I have the necessary
+            rights to use it, and I authorize its use to create
+            my requested Kingdom Twin.
+          </span>
+        </label>
+      </div>
+
+      <div id="twin-media-options"
+        style="
+          opacity:.38;pointer-events:none;
+          transition:opacity .25s;">
+
+        <div style="
+          font-size:10px;font-weight:800;
+          letter-spacing:.12em;color:var(--muted);
+          margin:0 0 10px;">
+          CHOOSE HOW TO START
+        </div>
+
+        <div style="
+          display:grid;
+          grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+          gap:10px;">
+
+          <button onclick="chooseTwinMedia('photos')"
+            style="
+              min-height:145px;text-align:left;
+              background:rgba(255,255,255,.025);
+              border:1px solid var(--border);
+              border-radius:16px;padding:18px;
+              color:var(--text);cursor:pointer;
+              font-family:'Montserrat',sans-serif;">
+            <div style="font-size:28px;margin-bottom:12px;">📸</div>
+            <div style="font-size:13px;font-weight:800;margin-bottom:5px;">
+              Upload Photos
+            </div>
+            <div style="
+              color:var(--muted);font-size:10px;
+              line-height:1.55;">
+              Select clear photos of yourself from your device.
+            </div>
+          </button>
+
+          <button onclick="chooseTwinMedia('video')"
+            style="
+              min-height:145px;text-align:left;
+              background:rgba(255,255,255,.025);
+              border:1px solid var(--border);
+              border-radius:16px;padding:18px;
+              color:var(--text);cursor:pointer;
+              font-family:'Montserrat',sans-serif;">
+            <div style="font-size:28px;margin-bottom:12px;">🎞️</div>
+            <div style="font-size:13px;font-weight:800;margin-bottom:5px;">
+              Upload Video
+            </div>
+            <div style="
+              color:var(--muted);font-size:10px;
+              line-height:1.55;">
+              Choose an existing video showing you clearly.
+            </div>
+          </button>
+
+          <button onclick="chooseTwinMedia('record')"
+            style="
+              min-height:145px;text-align:left;
+              background:rgba(255,255,255,.025);
+              border:1px solid var(--border);
+              border-radius:16px;padding:18px;
+              color:var(--text);cursor:pointer;
+              font-family:'Montserrat',sans-serif;">
+            <div style="font-size:28px;margin-bottom:12px;">🎥</div>
+            <div style="font-size:13px;font-weight:800;margin-bottom:5px;">
+              Record Video
+            </div>
+            <div style="
+              color:var(--muted);font-size:10px;
+              line-height:1.55;">
+              Use your camera to record a new Twin setup video.
+            </div>
+          </button>
+
+        </div>
+      </div>
+
+    </div>`;
+}
+
+function updateTwinConsent(){
+  const checked=document.getElementById('twin-consent')?.checked;
+  const options=document.getElementById('twin-media-options');
+  if(!options) return;
+
+  options.style.opacity=checked?'1':'.38';
+  options.style.pointerEvents=checked?'auto':'none';
+}
+
+function chooseTwinMedia(type){
+  const consent=document.getElementById('twin-consent');
+
+  if(!consent?.checked){
+    showToast('Please confirm consent first');
+    return;
+  }
+
+  let input=document.getElementById('twin-media-input');
+
+  if(input) input.remove();
+
+  input=document.createElement('input');
+  input.id='twin-media-input';
+  input.type='file';
+  input.style.display='none';
+
+  if(type==='photos'){
+    input.accept='image/*';
+    input.multiple=true;
+  }
+
+  if(type==='video'){
+    input.accept='video/*';
+  }
+
+  if(type==='record'){
+    input.accept='video/*';
+    input.setAttribute('capture','user');
+  }
+
+  input.onchange=()=>{
+    const files=Array.from(input.files||[]);
+
+    if(!files.length) return;
+
+    reviewTwinMedia(files,type);
+  };
+
+  document.body.appendChild(input);
+  input.click();
+}
+
+function reviewTwinMedia(files,type){
+  const p=document.getElementById('page');
+  if(!p) return;
+
+  const isPhotos=type==='photos';
+
+  const previews=files.map((file,index)=>{
+    const url=URL.createObjectURL(file);
+
+    if(file.type.startsWith('image/')){
+      return `
+        <div style="
+          position:relative;overflow:hidden;
+          border-radius:14px;border:1px solid var(--border);
+          background:#080808;aspect-ratio:1/1;">
+          <img src="${url}"
+            alt="Twin photo ${index+1}"
+            style="width:100%;height:100%;object-fit:cover;">
+        </div>`;
+    }
+
+    return `
+      <div style="
+        overflow:hidden;border-radius:14px;
+        border:1px solid var(--border);
+        background:#080808;">
+        <video src="${url}"
+          controls playsinline
+          style="display:block;width:100%;max-height:420px;">
+        </video>
+      </div>`;
+  }).join('');
+
+  window.__twinSelectedFiles=files;
+  window.__twinSelectedType=type;
+
+  p.innerHTML=`
+    <div style="max-width:760px;margin:0 auto;padding:24px 18px 110px;">
+
+      <button onclick="startTwinCreation()"
+        style="
+          background:none;border:0;color:var(--muted);
+          font-family:'Montserrat',sans-serif;
+          font-size:12px;cursor:pointer;
+          padding:5px 0;margin-bottom:20px;">
+        ← Choose Different Media
+      </button>
+
+      <div style="margin-bottom:22px;">
+        <div style="
+          color:var(--teal);font-size:9px;
+          font-weight:800;letter-spacing:.16em;
+          margin-bottom:7px;">
+          CREATE MY TWIN · STEP 2 OF 4
+        </div>
+
+        <h2 style="
+          font-family:'Playfair Display',serif;
+          font-size:30px;margin:0 0 8px;">
+          Review Your Media
+        </h2>
+
+        <p style="
+          color:var(--muted);font-size:12px;
+          line-height:1.7;margin:0;">
+          Make sure ${isPhotos?'your photos are':'your video is'}
+          clear and shows you well before continuing.
+        </p>
+      </div>
+
+      <div style="
+        display:grid;
+        grid-template-columns:${isPhotos?'repeat(auto-fit,minmax(130px,1fr))':'1fr'};
+        gap:10px;margin-bottom:20px;">
+        ${previews}
+      </div>
+
+      <div style="
+        background:rgba(255,255,255,.025);
+        border:1px solid var(--border);
+        border-radius:14px;padding:14px;
+        margin-bottom:18px;
+        font-size:10px;color:var(--muted);
+        line-height:1.6;">
+        🔒 Your selected media is being previewed on this device.
+        This step does not upload it to KingdomShift.Live yet.
+      </div>
+
+      <div style="
+        display:flex;gap:10px;
+        justify-content:flex-end;
+        flex-wrap:wrap;">
+
+        <button class="btn"
+          onclick="startTwinCreation()"
+          style="min-height:44px;">
+          Choose Again
+        </button>
+
+        <button class="btn btn-teal"
+          onclick="continueTwinSetup()"
+          style="min-height:44px;padding:0 20px;">
+          Continue →
+        </button>
+
+      </div>
+    </div>`;
+}
+
+function continueTwinSetup(){
+  if(!window.__twinSelectedFiles?.length){
+    showToast('Please select your media first');
+    return;
+  }
+
+  const p=document.getElementById('page');
+  if(!p) return;
+
+  const files=window.__twinSelectedFiles;
+  const type=window.__twinSelectedType;
+
+  p.innerHTML=`
+    <div style="max-width:760px;margin:0 auto;padding:24px 18px 110px;">
+
+      <button onclick="reviewTwinMedia(window.__twinSelectedFiles,window.__twinSelectedType)"
+        style="
+          background:none;border:0;color:var(--muted);
+          font-family:'Montserrat',sans-serif;font-size:12px;
+          cursor:pointer;padding:5px 0;margin-bottom:20px;">
+        ← Back to Media Review
+      </button>
+
+      <div style="margin-bottom:24px;">
+        <div style="
+          color:var(--teal);font-size:9px;font-weight:800;
+          letter-spacing:.16em;margin-bottom:7px;">
+          CREATE MY TWIN · STEP 3 OF 4
+        </div>
+
+        <h2 style="
+          font-family:'Playfair Display',serif;
+          font-size:30px;margin:0 0 8px;">
+          Set Up Your Twin
+        </h2>
+
+        <p style="
+          color:var(--muted);font-size:12px;
+          line-height:1.7;margin:0;">
+          Give your Twin a name and choose how you plan to use it.
+          You can change these settings later.
+        </p>
+      </div>
+
+      <div style="
+        background:rgba(255,255,255,.025);
+        border:1px solid var(--border);
+        border-radius:16px;padding:18px;
+        margin-bottom:14px;">
+
+        <label style="
+          display:block;font-size:9px;font-weight:800;
+          letter-spacing:.12em;color:var(--muted);
+          margin-bottom:7px;">
+          TWIN NAME
+        </label>
+
+        <input id="twin-name"
+          type="text"
+          maxlength="50"
+          placeholder="Example: My Kingdom Twin"
+          style="
+            width:100%;height:46px;
+            background:rgba(255,255,255,.04);
+            border:1px solid var(--border);
+            border-radius:10px;padding:0 13px;
+            color:var(--text);outline:none;
+            font-family:'Montserrat',sans-serif;
+            font-size:13px;">
+      </div>
+
+      <div style="
+        background:rgba(255,255,255,.025);
+        border:1px solid var(--border);
+        border-radius:16px;padding:18px;
+        margin-bottom:14px;">
+
+        <div style="
+          font-size:9px;font-weight:800;
+          letter-spacing:.12em;color:var(--muted);
+          margin-bottom:12px;">
+          I WANT TO USE MY TWIN FOR
+        </div>
+
+        <div style="
+          display:grid;
+          grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+          gap:9px;">
+
+          ${[
+            ['video','🎬','Videos'],
+            ['social','📱','Social Content'],
+            ['business','💼','Business'],
+            ['teaching','🎙️','Teaching'],
+            ['brand','✨','My Brand'],
+            ['other','➕','Other']
+          ].map(([value,icon,label])=>`
+            <label style="
+              display:flex;align-items:center;gap:9px;
+              min-height:50px;padding:10px 12px;
+              border:1px solid var(--border);
+              border-radius:11px;
+              background:rgba(255,255,255,.02);
+              cursor:pointer;">
+
+              <input type="checkbox"
+                class="twin-purpose"
+                value="${value}"
+                style="
+                  width:16px;height:16px;
+                  accent-color:var(--teal);">
+
+              <span style="font-size:17px;">${icon}</span>
+
+              <span style="
+                font-size:10px;font-weight:700;">
+                ${label}
+              </span>
+            </label>
+          `).join('')}
+
+        </div>
+      </div>
+
+      <div style="
+        border:1px solid rgba(0,201,200,.18);
+        background:rgba(0,201,200,.04);
+        border-radius:14px;padding:15px;
+        margin-bottom:20px;">
+
+        <div style="
+          font-size:11px;font-weight:800;
+          margin-bottom:5px;">
+          Media ready
+        </div>
+
+        <div style="
+          color:var(--muted);
+          font-size:10px;line-height:1.6;">
+          ${files.length} ${files.length===1?'file':'files'} selected
+          · ${type==='photos'?'Photos':type==='record'?'Recorded video':'Video'}.
+          Your media has not been uploaded yet.
+        </div>
+      </div>
+
+      <button class="btn btn-teal"
+        onclick="reviewTwinCreation()"
+        style="
+          width:100%;min-height:48px;
+          font-size:12px;">
+        Review Twin Setup →
+      </button>
+
+    </div>`;
+}
+
+function reviewTwinCreation(){
+  const name=document.getElementById('twin-name')?.value?.trim();
+
+  if(!name){
+    showToast('Give your Twin a name');
+    document.getElementById('twin-name')?.focus();
+    return;
+  }
+
+  const purposes=Array.from(
+    document.querySelectorAll('.twin-purpose:checked')
+  ).map(el=>el.value);
+
+  if(!purposes.length){
+    showToast('Choose at least one use for your Twin');
+    return;
+  }
+
+  window.__twinDraft={
+    name,
+    purposes,
+    mediaType:window.__twinSelectedType,
+    fileCount:window.__twinSelectedFiles?.length||0
+  };
+
+  renderTwinFinalReview();
+}
+
+function renderTwinFinalReview(){
+  const p=document.getElementById('page');
+  const draft=window.__twinDraft;
+
+  if(!p || !draft) return;
+
+  const labels={
+    video:'Videos',
+    social:'Social Content',
+    business:'Business',
+    teaching:'Teaching',
+    brand:'My Brand',
+    other:'Other'
+  };
+
+  p.innerHTML=`
+    <div style="max-width:760px;margin:0 auto;padding:24px 18px 110px;">
+
+      <button onclick="continueTwinSetup()"
+        style="
+          background:none;border:0;color:var(--muted);
+          font-family:'Montserrat',sans-serif;font-size:12px;
+          cursor:pointer;padding:5px 0;margin-bottom:20px;">
+        ← Edit Twin Setup
+      </button>
+
+      <div style="margin-bottom:24px;">
+        <div style="
+          color:var(--teal);font-size:9px;font-weight:800;
+          letter-spacing:.16em;margin-bottom:7px;">
+          CREATE MY TWIN · STEP 4 OF 4
+        </div>
+
+        <h2 style="
+          font-family:'Playfair Display',serif;
+          font-size:30px;margin:0 0 8px;">
+          Ready to Create Your Twin
+        </h2>
+
+        <p style="
+          color:var(--muted);font-size:12px;
+          line-height:1.7;margin:0;">
+          Review your setup before your media is securely submitted
+          for Twin creation.
+        </p>
+      </div>
+
+      <div style="
+        background:linear-gradient(135deg,rgba(0,201,200,.08),rgba(212,175,55,.05));
+        border:1px solid rgba(0,201,200,.22);
+        border-radius:18px;padding:20px;
+        margin-bottom:16px;">
+
+        <div style="
+          width:58px;height:58px;border-radius:50%;
+          display:flex;align-items:center;justify-content:center;
+          background:rgba(0,201,200,.10);
+          border:1px solid rgba(0,201,200,.22);
+          font-size:27px;margin-bottom:14px;">
+          ✨
+        </div>
+
+        <div style="
+          font-family:'Playfair Display',serif;
+          font-size:23px;font-weight:700;
+          margin-bottom:12px;">
+          ${escapeTwinText(draft.name)}
+        </div>
+
+        <div style="
+          color:var(--muted);font-size:11px;
+          line-height:1.8;">
+          <strong style="color:var(--text);">Media:</strong>
+          ${draft.fileCount} ${draft.fileCount===1?'file':'files'}<br>
+
+          <strong style="color:var(--text);">Purpose:</strong>
+          ${draft.purposes.map(v=>labels[v]||v).join(' · ')}
+        </div>
+      </div>
+
+      <div style="
+        border:1px solid var(--border);
+        border-radius:14px;padding:15px;
+        margin-bottom:18px;
+        color:var(--muted);font-size:10px;
+        line-height:1.6;">
+        🔒 Nothing has been uploaded yet. The next backend step will
+        securely store your approved media and submit it to the
+        Twin-generation service.
+      </div>
+
+      <button class="btn btn-teal"
+        onclick="beginTwinGeneration()"
+        style="
+          width:100%;min-height:50px;
+          font-size:12px;">
+        Create My Kingdom Twin ✨
+      </button>
+
+    </div>`;
+}
+
+function escapeTwinText(value){
+  return String(value||'').replace(/[&<>"']/g,ch=>({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#039;'
+  }[ch]));
+}
+
+function beginTwinGeneration(){
+  showToast('Secure Twin generation connection is next');
+}
+
+function showTwinLibrary(){
+  showToast('My Twins is next');
+}
+
+function showTwinCreations(){
+  showToast('My Creations is next');
+}
+
 function renderProfile(p){
   const u = S.profile;
   p.innerHTML=`
