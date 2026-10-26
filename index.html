@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <meta name="theme-color" content="#070707"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-title" content="KingdomShift"/>
@@ -10,14 +10,19 @@
 <link rel="icon" href="./logo.png"/>
 <link rel="apple-touch-icon" href="./logo.png"/>
 <title>KingdomShift.Live — Stream With Purpose</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Montserrat:wght@300;400;500;600;700;800&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet"/>
+<meta name="description" content="KingdomShift.Live connects a faith-centered community through teaching, worship, and conversation. Stream with purpose."/>
+<link rel="canonical" href="https://kingdomshiftlive.github.io/"/>
+<meta property="og:type" content="website"/>
+<meta property="og:title" content="KingdomShift.Live — Stream With Purpose"/>
+<meta property="og:description" content="A faith-centered community for teaching, worship, and conversation."/>
+<meta property="og:url" content="https://kingdomshiftlive.github.io/"/>
+<meta property="og:image" content="https://kingdomshiftlive.github.io/logo.png"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Montserrat:wght@300;400;500;600;700;800&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'"/>
 
-<!-- Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<!-- Stripe -->
-<script src="https://js.stripe.com/v3/"></script>
-<!-- ZegoCloud -->
-<script src="https://unpkg.com/zego-uikit-prebuilt/zego-uikit-prebuilt.js"></script>
+<!-- Pinned, locally hosted Supabase SDK -->
+<script src="./vendor/supabase-2.118.0.js"></script>
+
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -29,7 +34,7 @@
   --card:#111114;--card2:#161619;
   --glass:rgba(255,255,255,.04);--glassTeal:rgba(0,201,200,.06);
   --border:rgba(0,201,200,.12);--borderG:rgba(201,162,39,.15);
-  --text:#F2EFE8;--muted:#8A9AAA;--dim:#445560;
+  --text:#F2EFE8;--muted:#8A9AAA;--dim:#91A1AD;
   --green:#1DB954;--red:#FF4444;--purple:#9B59B6;
 }
 html,body{height:100%;overflow:hidden;background:var(--black);color:var(--text);font-family:'Montserrat',sans-serif;-webkit-font-smoothing:antialiased;}
@@ -97,7 +102,7 @@ html,body{height:100%;overflow:hidden;background:var(--black);color:var(--text);
 
 .bottom-nav{display:none;background:rgba(7,7,7,.97);backdrop-filter:blur(20px);border-top:1px solid var(--border);flex-shrink:0;}
 .bn-row{display:flex;padding-bottom:env(safe-area-inset-bottom,0);}
-.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0 4px;cursor:pointer;opacity:.4;transition:all .2s;}
+.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0 4px;cursor:pointer;opacity:1;transition:all .2s;}
 .bn-item.active{opacity:1;}
 .bn-item.active .bn-label{color:var(--teal);}
 .bn-icon{font-size:20px;line-height:1;}
@@ -422,9 +427,33 @@ html,body{height:100%;overflow:hidden;background:var(--black);color:var(--text);
 .loading-logo img{width:100%;height:100%;object-fit:cover;}
 .loading-spinner{width:30px;height:30px;border:3px solid rgba(0,201,200,.15);border-top-color:var(--teal);border-radius:50%;animation:spin 1s linear infinite;margin:18px 0;}
 .loading-text{font-size:11px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;}
+/* Accessible controls and responsive forms */
+button { font:inherit; }
+button.sb-item, button.bn-item, button.story, button.sr, button.list-row { color:inherit; text-align:left; background:transparent; border:0; }
+button.sb-item.active { background:linear-gradient(135deg,rgba(0,201,200,.1),rgba(201,162,39,.06)); border:1px solid rgba(0,201,200,.2); }
+button.mode-tile, button.sb-user, button.tb-btn, button.tb-menu { color:inherit; }
+button.fp-media { border:0; color:var(--text); }
+button.sb-item, button.sr, button.list-row, button.sb-user { width:100%; }
+button.bn-item { text-align:center; }
+button.tb-btn, button.tb-menu { background:var(--glass); border:1px solid var(--border); }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline:3px solid var(--gold); outline-offset:3px; }
+.auth-switch button { background:none; border:0; color:var(--teal); text-decoration:underline; cursor:pointer; min-height:44px; }
+.auth-input, textarea.input, select.input { min-height:44px; }
+.public-links { text-align:center; line-height:1.8; font-size:12px; }
+a { color:var(--teal); }
+.auth-title { font-size:22px; }
+@media (max-width:400px) { .auth-card { padding:24px 18px; } }
+@media (prefers-reduced-motion:reduce) { *, *::before, *::after { animation:none !important; transition:none !important; } }
+button.tb-btn, button.tb-menu, .back-btn { min-width:44px; min-height:44px; }
+.btn-teal { background:var(--teal); }
+.btn-pink { background:#A20E59; }
+.auth-promise, .auth-input::placeholder { color:var(--muted); }
+.toast { max-width:calc(100vw - 24px); white-space:normal; text-align:center; }
+@media(max-width:400px) { .shop-grid { grid-template-columns:minmax(0,1fr); } .topbar { padding:0 8px;gap:5px; } .tb-right { gap:3px; } .tb-title { font-size:12px; } }
 </style>
 </head>
 <body>
+<noscript><p>KingdomShift.Live requires JavaScript for account features. Read our <a href="./privacy.html">privacy policy</a> or contact <a href="mailto:kingdomshiftmedia@gmail.com">support</a>.</p></noscript>
 
 <!-- LOADING SCREEN -->
 <div class="loading-wrap" id="loading">
@@ -438,11 +467,13 @@ html,body{height:100%;overflow:hidden;background:var(--black);color:var(--text);
   <div class="auth-wrap">
     <div class="auth-card">
       <div class="auth-logo"><img src="./logo.png" alt="KS" onerror="this.parentElement.style.background='linear-gradient(135deg,#00C9C8,#C9A227)'"/></div>
-      <div class="auth-title" id="auth-title">KingdomShift.Live</div>
+      <h1 class="auth-title" id="auth-title">KingdomShift.Live</h1>
       <div class="auth-sub" id="auth-sub">Sign in to your account</div>
-      <div class="auth-error" id="auth-error"></div>
+      <div class="auth-error" id="auth-error" role="alert"></div>
       <div id="auth-form"></div>
-      <div class="auth-promise">✓ Free to join &nbsp;·&nbsp; ✓ Your data is never sold &nbsp;·&nbsp; ✓ Withdraw after 5K followers</div>
+      <p class="auth-sub" style="margin-top:16px">A faith-centered community for teaching, worship, and conversation.</p>
+      <p class="public-links"><a href="./privacy.html">Privacy</a> · <a href="#terms">Terms</a> · <a href="./child-safety.html">Child safety</a> · <a href="./delete-account.html">Account deletion</a></p>
+      <div class="auth-promise">✓ Free to join &nbsp;·&nbsp; ✓ Your data is never sold &nbsp;·&nbsp; Payments and streaming are not yet available</div>
     </div>
   </div>
 </div>
@@ -462,26 +493,26 @@ html,body{height:100%;overflow:hidden;background:var(--black);color:var(--text);
       </div>
       <nav class="sb-nav" id="sb-nav"></nav>
       <div class="sb-footer">
-        <div class="sb-user" onclick="navigate('profile')">
+        <button type="button" class="sb-user" onclick="navigate('profile')">
           <div class="sb-av" id="sb-av">👤</div>
           <div>
             <div class="sb-uname" id="sb-uname">Loading...</div>
-            <div class="sb-ustatus">● Online</div>
+            <div class="sb-ustatus">Account</div>
           </div>
-        </div>
+        </button>
       </div>
     </aside>
     <div class="main">
       <div class="topbar" id="topbar">
-        <div class="tb-menu" id="menu-btn" onclick="toggleDrawer()">☰</div>
+        <button type="button" class="tb-menu" id="menu-btn" aria-label="Open navigation menu" aria-controls="drawer" aria-expanded="false" onclick="toggleDrawer()">☰</button>
         <div class="tb-title" id="tb-title">Feed</div>
         <div class="tb-right">
           <div id="live-tag-wrap" style="display:none;">
             <div class="live-tag"><div class="live-dot"></div>LIVE</div>
           </div>
-          <div class="tb-btn" onclick="showToast('🔔 Notifications')">🔔<div class="tb-notif">3</div></div>
-          <div class="tb-btn" onclick="showToast('💬 Messages')">💬</div>
-          <div class="tb-btn" onclick="navigate('search')">🔍</div>
+          <button type="button" class="tb-btn" aria-label="Notifications unavailable" onclick="showToast('Notifications are not available yet')">🔔</button>
+          <button type="button" class="tb-btn" aria-label="Messaging unavailable" onclick="showToast('Messaging is not available yet')">💬</button>
+          <button type="button" class="tb-btn" aria-label="Search" onclick="navigate('search')">🔍</button>
         </div>
       </div>
       <div class="page" id="page"></div>
@@ -492,7 +523,8 @@ html,body{height:100%;overflow:hidden;background:var(--black);color:var(--text);
 
 <!-- MOBILE DRAWER -->
 <div class="overlay" id="drawer-overlay" onclick="toggleDrawer()"></div>
-<div class="drawer" id="drawer">
+<div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Navigation" inert>
+<button class="btn btn-glass" aria-label="Close navigation" onclick="toggleDrawer(false)">Close menu</button>
   <div class="sb-top" style="padding:18px;">
     <div class="sb-brand">
       <div class="sb-logo" style="width:36px;height:36px;"><img src="./logo.png" alt="KS"/></div>
@@ -504,20 +536,22 @@ html,body{height:100%;overflow:hidden;background:var(--black);color:var(--text);
 
 <script>
 // ═══════════════════════════════════════════════════════
-// CREDENTIALS — Connected
+// PUBLIC CLIENT CONFIGURATION
 // ═══════════════════════════════════════════════════════
 const SUPABASE_URL  = 'https://zyhkginxgjxzfhtckwdy.supabase.co';
 const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5aGtnaW54Z2p4emZodGNrd2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3Njk0ODQsImV4cCI6MjA5NTM0NTQ4NH0.yGDlb9yJUWDAHcrwWdc_WaWYFnoyBELedLZ5ZpuR_Ik';
-const STRIPE_KEY    = 'pk_live_51RF3hvIrxXWf5kWlS44TLxP5626fVOquwJtxSY902PkDcyDekQgPM5dhsvZTwH96Z30XYKjUXooLotCiZbJ4xWqj00fFVvRabI';
-const ZID   = 610561179;
-const ZSIGN = 'ea178866d109ba1f3da221522a5b60b8a8b990b1ae673e4090b3c401d474e748';
 
 // ═══════════════════════════════════════════════════════
 // INIT SUPABASE
 // ═══════════════════════════════════════════════════════
-const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
-const stripe = Stripe(STRIPE_KEY);
+const sb = window.supabase?.createClient(SUPABASE_URL, SUPABASE_KEY);
+function escapeHTML(value) {
+  return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+// Encode both the JavaScript string and the containing HTML attribute.
+function jsArg(value) { return escapeHTML(JSON.stringify(String(value ?? ''))); }
+function count(value) { return Math.max(0, Number(value) || 0); }
+const PROFILE_FIELDS = 'id,username,display_name,bio,avatar,avatar_url,banner_url,followers,following,videos,coins,verified,is_pro,is_church_pro,tier,role,strikes,suspended,battle_score,joined_at,updated_at';
 
 // ═══════════════════════════════════════════════════════
 // STATE
@@ -600,7 +634,6 @@ const NAV_ITEMS=[
   {id:'safe',    icon:'🛡️',label:'Safe Stream',    section:'COMMUNITY'},
   {id:'profile', icon:'👤',label:'Profile',         section:'ACCOUNT'},
   {id:'settings',icon:'⚙️',label:'Settings',        section:null},
-  {id:'admin',   icon:'🔐',label:'Admin Panel',     section:'PLATFORM'},
 ];
 const MOBILE_NAV=[
   {id:'feed',icon:'🏠',label:'Feed'},
@@ -627,7 +660,10 @@ async function boot() {
   document.getElementById('loading').style.display = 'none';
 
   // Listen for auth changes
-  sb.auth.onAuthStateChange(async (event, session) => {
+  sb.auth.onAuthStateChange((event, session) => {
+    // Defer API calls until Supabase releases its authentication lock.
+    setTimeout(async () => {
+    try {
     if (event === 'SIGNED_IN' && session) {
       S.user = session.user;
       await loadProfile();
@@ -636,6 +672,8 @@ async function boot() {
       S.user = null; S.profile = null;
       showAuth('login');
     }
+    } catch { showAuth('login'); showAuthError('Unable to load your account. Please retry.'); }
+    }, 0);
   });
 }
 
@@ -643,13 +681,20 @@ async function loadProfile() {
   try {
     const { data, error } = await sb
       .from('profiles')
-      .select('*')
+      .select(PROFILE_FIELDS)
       .eq('id', S.user.id)
-      .single();
+      .maybeSingle();
 
+    if (error) throw error;
     if (data) {
-      S.profile = data;
-      S.coins = data.coins || 0;
+      S.profile = {...data, email:S.user.email};
+      S.coins = count(data.coins);
+      const { data: settings, error: settingsError } = await sb.rpc('get_my_settings');
+      if (settingsError) throw settingsError;
+      if (settings) {
+        Object.assign(S.notifSettings, settings.notif_settings || {});
+        Object.assign(S.privacySettings, settings.privacy_settings || {});
+      }
       S.isPro = data.is_pro || false;
       document.getElementById('sb-uname').textContent = data.display_name || data.username || 'Creator';
       document.getElementById('sb-av').textContent = data.avatar || '👤';
@@ -658,59 +703,67 @@ async function loadProfile() {
       await createProfile();
     }
   } catch (e) {
-    console.log('Profile load:', e);
+    throw new Error('Unable to load your profile. Please retry.');
   }
 }
 
 async function createProfile() {
-  const username = S.user.email.split('@')[0].replace(/[^a-z0-9_]/gi,'').toLowerCase();
-  const { data } = await sb.from('profiles').insert({
+  const base = (S.user.user_metadata?.username || S.user.email.split('@')[0]).replace(/[^a-z0-9_]/gi,'').toLowerCase();
+  const username = `${base.slice(0,24)}_${S.user.id.slice(0,8)}`;
+  const { data, error } = await sb.from('profiles').insert({
     id: S.user.id,
-    email: S.user.email,
     username: username,
     display_name: username,
-    role: 'creator',
-    tier: 'Seed',
-    coins: 0,
-    followers: 0,
-    following: 0,
-    is_pro: false,
-  }).select().single();
-  if (data) { S.profile = data; }
+  }).select(PROFILE_FIELDS).single();
+  if (error) throw error;
+  if (data) { S.profile = {...data, email:S.user.email}; }
   document.getElementById('sb-uname').textContent = username;
 }
 
 async function handleSignUp() {
   if (S.authLoading) return;
-  const email    = document.getElementById('af-email')?.value?.trim();
-  const password = document.getElementById('af-pass')?.value;
-  const username = document.getElementById('af-user')?.value?.trim();
+  if (!sb) { showAuthError('Account services are unavailable. Please refresh.'); return; }
+  const email=document.getElementById('af-email').value.trim();
+  const password=document.getElementById('af-pass').value;
+  const username=document.getElementById('af-user').value.trim();
   if (!email || !password || !username) { showAuthError('Please fill in all fields'); return; }
-  if (password.length < 6) { showAuthError('Password must be at least 6 characters'); return; }
+  if (!document.getElementById('af-email').checkValidity()) { showAuthError('Please enter a valid email address'); return; }
+  if (!/^[a-zA-Z0-9_]{3,24}$/.test(username)) { showAuthError('Use 3–24 letters, numbers, or underscores for your username'); return; }
+  if (password.length < 8) { showAuthError('Password must be at least 8 characters'); return; }
   setAuthLoading(true);
-  const { error } = await sb.auth.signUp({
-    email, password,
-    options: { data: { username, display_name: username } }
-  });
-  setAuthLoading(false);
-  if (error) { showAuthError(error.message); }
-  else { showAuthError('✅ Check your email to confirm your account', true); }
+  try {
+    const { error } = await sb.auth.signUp({email,password,options:{data:{username,display_name:username}}});
+    if (error) throw error;
+    showAuthError('Check your email to confirm your account',true);
+  } catch (error) { showAuthError(error.message || 'Unable to create your account. Please retry.'); }
+  finally { setAuthLoading(false); }
 }
 
 async function handleSignIn() {
   if (S.authLoading) return;
-  const email    = document.getElementById('af-email')?.value?.trim();
-  const password = document.getElementById('af-pass')?.value;
+  if (!sb) { showAuthError('Account services are unavailable. Please refresh.'); return; }
+  const email=document.getElementById('af-email').value.trim();
+  const password=document.getElementById('af-pass').value;
   if (!email || !password) { showAuthError('Please enter your email and password'); return; }
   setAuthLoading(true);
-  const { error } = await sb.auth.signInWithPassword({ email, password });
-  setAuthLoading(false);
-  if (error) { showAuthError(error.message); }
+  try {
+    const { error } = await sb.auth.signInWithPassword({email,password});
+    if (error) throw error;
+  } catch (error) { showAuthError(error.message || 'Unable to sign in. Please retry.'); }
+  finally { setAuthLoading(false); }
 }
 
 async function handleSignOut() {
-  await sb.auth.signOut();
-  showToast('Signed out');
+  try {
+    const { error } = await sb.auth.signOut();
+    if (error) throw error;
+    stopGiftAuto(); clearQuizTimer();
+    Object.assign(S,{user:null,profile:null,coins:0,isPro:false,posts:[],shopItems:[],liked:{},saved:{},following:{},subPage:null});
+    Object.assign(S.notifSettings,{newFollower:true,gifts:true,comments:true,messages:true,systemAlerts:true,weeklyDigest:false});
+    Object.assign(S.privacySettings,{privateAccount:false,showOnline:true,allowMessages:true,allowComments:true});
+    history.replaceState(null,'',location.pathname);
+    showAuth('login'); showToast('Signed out');
+  } catch { showToast('Sign out failed. Please retry.'); }
 }
 
 function showAuthError(msg, isSuccess=false) {
@@ -752,16 +805,16 @@ function renderAuthForm() {
   document.getElementById('auth-error').style.display = 'none';
   document.getElementById('auth-form').innerHTML = `
     <div style="display:flex;flex-direction:column;gap:12px;">
-      ${!isLogin?`<div style="margin-bottom:12px"><label class="lbl">Username</label><input class="auth-inp" id="af-user" placeholder="your_kingdom_name" type="text"/></div>`:''}
-      <div style="margin-bottom:12px"><label class="lbl">Email Address</label><input class="auth-inp" id="af-email" placeholder="you@email.com" type="email"/></div>
-      <div style="margin-bottom:12px"><label class="lbl">Password</label><input class="auth-inp" id="af-pass" placeholder="${isLogin?'Your password':'Min. 6 characters'}" type="password" onkeydown="if(event.key==='Enter')${isLogin?'handleSignIn':'handleSignUp'}()"/></div>
-      <button class="auth-btn" id="auth-submit-btn" onclick="${isLogin?'handleSignIn':'handleSignUp'}()">
+      ${!isLogin?`<div style="margin-bottom:12px"><label class="auth-label" for="af-user">Username</label><input class="auth-input" autocomplete="username" id="af-user" placeholder="your_kingdom_name" type="text"/></div>`:''}
+      <div style="margin-bottom:12px"><label class="auth-label" for="af-email">Email Address</label><input class="auth-input" autocomplete="email" id="af-email" placeholder="you@email.com" type="email"/></div>
+      <div style="margin-bottom:12px"><label class="auth-label" for="af-pass">Password</label><input class="auth-input" autocomplete="${isLogin?'current-password':'new-password'}" id="af-pass" placeholder="${isLogin?'Your password':'Min. 8 characters'}" type="password" onkeydown="if(event.key==='Enter')${isLogin?'handleSignIn':'handleSignUp'}()"/></div>
+      <button class="auth-btn" id="auth-submit-btn" ${!sb?'disabled':''} onclick="${isLogin?'handleSignIn':'handleSignUp'}()">
         ${isLogin?'Sign In →':'Create Free Account →'}
       </button>
     </div>
     <div class="auth-switch">
-      ${isLogin?`Don't have an account? <a onclick="showAuth('register')">Join Free</a>`:
-      `Already have an account? <a onclick="showAuth('login')">Sign In</a>`}
+      ${isLogin?`Don't have an account? <button type="button" onclick="showAuth('register')">Join Free</button>`:
+      `Already have an account? <button type="button" onclick="showAuth('login')">Sign In</button>`}
     </div>`;
 }
 
@@ -771,7 +824,7 @@ function renderAuthForm() {
 function showToast(msg) {
   document.querySelectorAll('.toast').forEach(t=>t.remove());
   const t = document.createElement('div');
-  t.className='toast'; t.textContent=msg;
+  t.className='toast'; t.setAttribute('role','status'); t.textContent=msg;
   document.body.appendChild(t);
   setTimeout(()=>t.remove(), 2400);
 }
@@ -781,7 +834,9 @@ function showToast(msg) {
 // ═══════════════════════════════════════════════════════
 function navigate(tab, subPage) {
   stopGiftAuto(); clearQuizTimer();
-  S.tab=tab; A.subPage=subPage||null; S.giftTrayOpen=false;
+  S.tab=tab; S.subPage=subPage||null; S.giftTrayOpen=false;
+  const route = subPage || tab;
+  if (window.location.hash !== '#' + route) history.pushState(null, '', '#' + route);
   updateNav(); render();
   const p=document.getElementById('page'); if(p) p.scrollTop=0;
   toggleDrawer(false);
@@ -789,7 +844,7 @@ function navigate(tab, subPage) {
 
 function updateNav() {
   const found = NAV_ITEMS.find(n=>n.id===S.tab);
-  const title = A.subPage ? A.subPage.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()) : (found?.label||'KingdomShift.Live');
+  const title = S.subPage ? S.subPage.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()) : (found?.label||'KingdomShift.Live');
   document.getElementById('tb-title').textContent = title;
   document.getElementById('live-tag-wrap').style.display = S.tab==='live' ? 'block' : 'none';
 
@@ -799,29 +854,35 @@ function updateNav() {
     NAV_ITEMS.forEach(n=>{
       if(n.section&&n.section!==lastSec){html+=`<div class="sb-section">${n.section}</div>`;lastSec=n.section;}
       else if(!n.section){lastSec=null;}
-      const active=S.tab===n.id&&!A.subPage;
-      html+=`<div class="sb-item ${active?'active':''}" onclick="navigate('${n.id}')">
+      const active=S.tab===n.id&&!S.subPage;
+      html+=`<button type="button" class="sb-item ${active?'active':''}" onclick="navigate('${n.id}')">
         <span class="sb-icon">${n.icon}</span>
         <span class="sb-label">${n.label}</span>
         ${n.id==='admin'?'<span class="sb-badge gold">ADMIN</span>':''}
-      </div>`;
+      </button>`;
     });
     el.innerHTML=html;
   });
 
   const bn=document.getElementById('bn-row'); if(!bn) return;
   bn.innerHTML=MOBILE_NAV.map(n=>`
-    <div class="bn-item ${S.tab===n.id?'active':''}" onclick="navigate('${n.id}')">
+    <button type="button" class="bn-item ${S.tab===n.id?'active':''}" onclick="navigate('${n.id}')">
       <span class="bn-icon">${n.icon}</span>
       <span class="bn-label">${n.label}</span>
       ${S.tab===n.id?'<div class="bn-pip"></div>':''}
-    </div>`).join('');
+    </button>`).join('');
 }
 
 function toggleDrawer(force) {
   const ov=document.getElementById('drawer-overlay'), dr=document.getElementById('drawer');
-  const open=force!==undefined?force:!dr.classList.contains('open');
+  const wasOpen=dr.classList.contains('open');
+  const open=force!==undefined?force:!wasOpen;
   dr.classList.toggle('open',open); ov.classList.toggle('open',open);
+  document.getElementById('menu-btn').setAttribute('aria-expanded',String(open));
+  dr.inert=!open;
+  document.getElementById('app-view').inert=open;
+  if (open) { dr.querySelector('button')?.focus(); }
+  else if (wasOpen) document.getElementById('menu-btn').focus();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -838,7 +899,7 @@ function render() {
     delete_account:renderDeleteAccount,
     child_safety:renderChildSafety,
   };
-  if(A.subPage&&subRenders[A.subPage]){subRenders[A.subPage](p);return;}
+  if(S.subPage&&subRenders[S.subPage]){subRenders[S.subPage](p);return;}
   const renders={
     feed:renderFeed, live:renderLive, shop:renderShop,
     wealth:renderWealth, safe:renderSafe, battles:renderBattles,
@@ -868,103 +929,54 @@ function renderFeed(p) {
   if (S.posts.length === 0) fetchPosts().then(()=>render());
   const posts = S.posts.length > 0 ? S.posts : DEMO_POSTS;
   p.innerHTML=`
+  <h1 class="page-title" style="padding:14px 14px 0">Community Feed</h1><p style="padding:14px;color:var(--muted)">Feed preview. Sample posts are shown when no published posts are available. Likes, follows, and saves last for this visit.</p>
   <div class="stories-bar">
     ${[{u:'You',a:'➕'},{u:'Pastor_Em',a:'👨🏿‍💼'},{u:'Zoe_W',a:'👩🏽‍🎤'},{u:'KingFin',a:'👨🏾‍💻'},{u:'Apostle',a:'👩🏾‍⚖️'},{u:'Youth',a:'👨🏼‍🎓'}]
-      .map(s=>`<div class="story" onclick="showToast('${s.u}\'s story')">
+      .map(s=>`<button type="button" class="story" onclick="showToast(${jsArg(s.u + ' stories are not available yet')})">
         <div class="story-ring"><div class="story-inner">${s.a}</div></div>
-        <span class="story-name">${s.u}</span></div>`).join('')}
+        <span class="story-name">${s.u}</span></button>`).join('')}
   </div>
   ${posts.map((post,i)=>`
   <div class="feed-post" style="animation-delay:${i*.06}s">
     <div class="fp-header">
-      <div class="fp-av">${post.avatar||post.profiles?.avatar||'👤'}</div>
+      <div class="fp-av">${escapeHTML(post.avatar||post.profiles?.avatar||'👤')}</div>
       <div style="flex:1;">
-        <div class="fp-name">${post.profiles?.display_name||post.user||'Creator'}${(post.verified||post.profiles?.verified)?'<span class="fp-verified">✓</span>':''}</div>
-        <div class="fp-meta">${post.profiles?.username?('@'+post.profiles.username):post.handle||''} · ${post.time||'recently'}</div>
+        <div class="fp-name">${escapeHTML(post.profiles?.display_name||post.user||'Creator')}${(post.verified||post.profiles?.verified)?'<span class="fp-verified">✓</span>':''}</div>
+        <div class="fp-meta">${escapeHTML(post.profiles?.username?('@'+post.profiles.username):post.handle||'')} · ${escapeHTML(post.time||'recently')}</div>
       </div>
-      <button class="fp-follow ${S.following[post.id]?'on':''}" onclick="toggleFollow(${post.id},'${post.profiles?.display_name||post.user||'Creator'}')">
+      <button class="fp-follow ${S.following[post.id]?'on':''}" onclick="toggleFollow(${jsArg(post.id)},${jsArg(post.profiles?.display_name||post.user||'Creator')})">
         ${S.following[post.id]?'Following':'Follow'}</button>
     </div>
-    <div class="fp-media" onclick="showToast('▶ Playing video')">
+    <button type="button" class="fp-media" aria-label="Video playback unavailable" onclick="showToast('Video playback is not available yet')">
       <div class="fp-play">▶</div>
       ${post.type==='live'?'<div class="fp-badge fp-live-badge">🔴 LIVE</div>':''}
-      <div class="fp-badge fp-cat-badge">${post.category||post.cat||'Faith'}</div>
-      ${post.dur?`<div class="fp-dur">${post.dur}</div>`:''}
-    </div>
-    <div class="fp-text">${post.description||post.content||''}</div>
+      <div class="fp-badge fp-cat-badge">${escapeHTML(post.category||post.cat||'Faith')}</div>
+      ${post.dur?`<div class="fp-dur">${escapeHTML(post.dur)}</div>`:''}
+    </button>
+    <div class="fp-text">${escapeHTML(post.description||post.content||'')}</div>
     <div class="fp-actions">
-      <button class="fp-act" onclick="toggleLike(${post.id},${post.likes||0})">
+      <button class="fp-act" onclick="toggleLike(${jsArg(post.id)},${count(post.likes)})">
         <span class="fp-act-icon">${S.liked[post.id]?'❤️':'🤍'}</span>
-        <span id="lk${post.id}">${((post.likes||0)+(S.liked[post.id]?1:0)).toLocaleString()}</span>
+        <span id="lk${escapeHTML(post.id)}">${(count(post.likes)+(S.liked[post.id]?1:0)).toLocaleString()}</span>
       </button>
-      <button class="fp-act" onclick="showToast('💬 Comments')"><span class="fp-act-icon">💬</span><span>${(post.comments||0).toLocaleString()}</span></button>
-      <button class="fp-act" onclick="showToast('↗️ Link copied!')"><span class="fp-act-icon">↗️</span><span>${(post.shares||0).toLocaleString()}</span></button>
-      <button class="fp-save" onclick="toggleSave(${post.id})">${S.saved[post.id]?'🔖':'🏷️'}</button>
+      <button class="fp-act" onclick="showToast('Comments are not available yet')"><span class="fp-act-icon">💬</span><span>${count(post.comments).toLocaleString()}</span></button>
+      <button class="fp-act" onclick="showToast('Sharing is not available yet')"><span class="fp-act-icon">↗️</span><span>${count(post.shares).toLocaleString()}</span></button>
+      <button aria-label="Save for this visit" class="fp-save" onclick="toggleSave(${jsArg(post.id)})">${S.saved[post.id]?'🔖':'🏷️'}</button>
     </div>
   </div>`).join('')}
   <div style="padding:40px;text-align:center;font-size:12px;color:var(--dim);font-family:'Crimson Text',serif;font-style:italic;">
     You are all caught up · "He gives you the ability to produce wealth." — Deut. 8:18
   </div>`;
 }
-function toggleFollow(id,name){S.following[id]=!S.following[id];showToast(S.following[id]?`Following ${name}`:`Unfollowed ${name}`);render();}
+function toggleFollow(id,name){S.following[id]=!S.following[id];showToast(S.following[id]?`Following ${name} for this visit`:`Unfollowed ${name} for this visit`);render();}
 function toggleLike(id,base){S.liked[id]=!S.liked[id];const el=document.getElementById('lk'+id);if(el)el.textContent=((base||0)+(S.liked[id]?1:0)).toLocaleString();const btn=el?.previousElementSibling;if(btn)btn.textContent=S.liked[id]?'❤️':'🤍';if(S.liked[id])showToast('❤️ Liked!');}
-function toggleSave(id){S.saved[id]=!S.saved[id];showToast(S.saved[id]?'🔖 Saved!':'Removed');render();}
+function toggleSave(id){S.saved[id]=!S.saved[id];showToast(S.saved[id]?'Saved for this visit':'Removed');render();}
 
 // ═══════════════════════════════════════════════════════
 // LIVE — ZegoCloud
 // ═══════════════════════════════════════════════════════
 function renderLive(p) {
-  stopGiftAuto();
-  fetchLiveStreams().then(streams => {
-    p.innerHTML = `
-    <div style="background:linear-gradient(135deg,#0A1414,var(--black));min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px;text-align:center;border-bottom:1px solid var(--border);">
-      <div style="font-size:48px;margin-bottom:12px;filter:drop-shadow(0 0 30px rgba(0,201,200,.4));">📡</div>
-      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;background:linear-gradient(90deg,var(--teal),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;">KingdomShift.Live</div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:20px;">${streams.length > 0 ? streams.length + ' streams live right now' : 'Be the first to go live today'}</div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-        <button class="btn btn-pink" onclick="startGoLive()">🔴 Go Live Now</button>
-        <button class="btn btn-glass" onclick="navigate('live','live_streaming_guide')">📡 Setup Guide</button>
-        <button class="btn btn-glass" onclick="showCoinsModal()">🪙 ${S.coins} Coins</button>
-      </div>
-    </div>
-
-    ${streams.length > 0 ? `
-    <div style="padding:14px 14px 8px;">
-      <div class="sec-title">🔴 Live Right Now</div>
-    </div>
-    <div style="padding:0 14px;">
-      ${streams.map(stream => `
-      <div style="background:var(--card);border:1px solid rgba(233,30,140,.2);border-radius:14px;padding:14px;margin-bottom:10px;cursor:pointer;display:flex;gap:12px;align-items:center;"
-        onclick="joinStream('${stream.id}','${(stream.profiles?.display_name||'Creator').replace(/'/g,"\'")}')">
-        <div style="font-size:32px;">${stream.profiles?.avatar||'👤'}</div>
-        <div style="flex:1;">
-          <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px;">
-            <div style="font-family:'Playfair Display',serif;font-size:14px;font-weight:700;">${stream.profiles?.display_name||'Creator'}</div>
-            <div style="background:var(--pink);border-radius:20px;padding:2px 8px;font-size:9px;font-weight:700;color:#fff;">LIVE</div>
-          </div>
-          <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${stream.title||'Live Stream'}</div>
-          <div style="font-size:11px;color:var(--teal);">👁 ${(stream.viewer_count||0).toLocaleString()} watching</div>
-        </div>
-        <div style="font-size:24px;">▶</div>
-      </div>`).join('')}
-    </div>` : ''}
-
-    <div style="padding:14px;">
-      <div class="sec-title">🎁 Gift Tiers</div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;">
-        ${GIFTS.map(g=>`
-        <div style="background:var(--card);border:1px solid ${g.col||g.color}25;border-radius:12px;padding:10px;text-align:center;">
-          <div style="font-size:22px;margin-bottom:4px;">${g.i||g.icon}</div>
-          <div style="font-size:10px;font-weight:700;color:${g.col||g.color};">${g.n||g.name}</div>
-          <div style="font-size:9px;color:var(--muted);">🪙${g.c||g.coins}</div>
-        </div>`).join('')}
-      </div>
-      <div style="background:rgba(0,201,200,.05);border:1px solid rgba(0,201,200,.1);border-radius:12px;padding:12px;text-align:center;font-size:11px;color:var(--dim);line-height:1.7;">
-        Powered by ZegoCloud · Up to 50,000 viewers<br/>
-        Platform 80% · Creator 20% on all gifts
-      </div>
-    </div>`;
-  });
+  p.innerHTML = `<div class="page-hdr"><h1 class="page-title">Live</h1><p class="page-sub">Live streaming is not available yet. No broadcasts or viewer counts are being simulated.</p></div>`;
 }
 
 async function fetchLiveStreams() {
@@ -978,174 +990,15 @@ async function fetchLiveStreams() {
   } catch { return []; }
 }
 
-async function startGoLive() {
-  if (!S.user) { showToast('Please sign in first'); return; }
-  const existing = document.getElementById('golive-modal');
-  if (existing) existing.remove();
-  const el = document.createElement('div');
-  el.className = 'modal-bg'; el.id = 'golive-modal';
-  el.innerHTML = `
-    <div class="modal">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <div class="modal-ttl">🔴 Go Live</div>
-        <button onclick="document.getElementById('golive-modal').remove()"
-          style="background:var(--glass);border:1px solid var(--border);border-radius:50%;width:30px;height:30px;color:var(--muted);cursor:pointer;font-size:16px;">×</button>
-      </div>
-      <div style="margin-bottom:12px">
-        <label class="lbl">Stream Title</label>
-        <input class="auth-inp" id="stream-title" placeholder="What are you streaming today?" type="text"/>
-      </div>
-      <div style="margin:12px 0;font-size:11px;color:var(--dim);line-height:1.8;">
-        ✓ Real-time viewers via ZegoCloud<br/>
-        ✓ Gift animations during your stream<br/>
-        ✓ Up to 50,000 concurrent viewers<br/>
-        ✓ Stream saved to database automatically
-      </div>
-      <button class="auth-btn" onclick="launchGoLive()">🔴 Start Streaming</button>
-    </div>`;
-  el.addEventListener('click', e=>{ if(e.target===el) el.remove(); });
-  document.body.appendChild(el);
-}
+function startGoLive() { showToast("Live broadcasting is not available yet."); }
 
-async function launchGoLive() {
-  const title = document.getElementById('stream-title')?.value || 'Live Stream';
-  document.getElementById('golive-modal')?.remove();
-  const streamId = 'ks_' + S.user.id.slice(0,8) + '_' + Date.now();
-  await sb.from('live_streams').insert({
-    id: streamId, creator_id: S.user.id,
-    title: title, status: 'live',
-    viewer_count: 0, started_at: new Date().toISOString(),
-  });
-  const p = document.getElementById('page');
-  p.innerHTML = `
-    <div style="height:calc(100vh - 52px);position:relative;">
-      <div id="zego-container" style="width:100%;height:100%;"></div>
-      <button onclick="endStream('${streamId}')"
-        style="position:absolute;top:14px;right:14px;z-index:999;
-        background:var(--red);border:none;border-radius:20px;
-        padding:8px 18px;color:#fff;font-family:'Montserrat',sans-serif;
-        font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.04em;">
-        ■ End Stream
-      </button>
-    </div>`;
-  try {
-    const token = ZegoUIKitPrebuilt.generateKitTokenForTest(
-      ZID, ZSIGN, streamId,
-      S.user.id, S.profile?.display_name || 'Creator'
-    );
-    const kit = ZegoUIKitPrebuilt.create(token);
-    kit.joinRoom({
-      container: document.getElementById('zego-container'),
-      sharedLinks: [{ name: 'Watch on KingdomShift.Live', url: 'https://kingdomshift.live?stream=' + streamId }],
-      scenario: { mode: ZegoUIKitPrebuilt.LiveStreaming, config: { role: ZegoUIKitPrebuilt.Host } },
-      showPreJoinView: true,
-      turnOnCameraWhenJoining: true,
-      turnOnMicrophoneWhenJoining: true,
-      showTextChat: true,
-      showUserList: true,
-      maxUsers: 50000,
-      onLeaveRoom: () => endStream(streamId),
-    });
-    showToast('🔴 You are live!');
-  } catch(e) {
-    showToast('Starting stream... ' + (e.message||''));
-  }
-}
+function launchGoLive() { showToast("Live broadcasting is not available yet."); }
 
-async function endStream(streamId) {
-  await sb.from('live_streams').update({ status: 'ended', ended_at: new Date().toISOString() }).eq('id', streamId);
-  navigate('live');
-  showToast('Stream ended 🙏');
-}
+function endStream() { showToast("Live broadcasting is not available yet."); }
 
-async function joinStream(streamId, creatorName) {
-  if (!S.user) { showToast('Please sign in to watch'); return; }
-  const p = document.getElementById('page');
-  p.innerHTML = `
-    <div style="height:calc(100vh - 52px);position:relative;">
-      <div id="zego-container" style="width:100%;height:100%;"></div>
-      <button onclick="navigate('live')"
-        style="position:absolute;top:14px;left:14px;z-index:999;
-        background:rgba(0,0,0,.7);border:1px solid var(--border);border-radius:20px;
-        padding:8px 18px;color:var(--text);font-family:'Montserrat',sans-serif;
-        font-size:12px;font-weight:700;cursor:pointer;backdrop-filter:blur(8px);">
-        ← Leave
-      </button>
-    </div>`;
-  try {
-    const token = ZegoUIKitPrebuilt.generateKitTokenForTest(
-      ZID, ZSIGN, streamId,
-      S.user.id, S.profile?.display_name || 'Viewer'
-    );
-    const kit = ZegoUIKitPrebuilt.create(token);
-    kit.joinRoom({
-      container: document.getElementById('zego-container'),
-      scenario: { mode: ZegoUIKitPrebuilt.LiveStreaming, config: { role: ZegoUIKitPrebuilt.Audience } },
-      showPreJoinView: false,
-      showTextChat: true,
-      showUserList: false,
-      onLeaveRoom: () => navigate('live'),
-    });
-  } catch(e) {
-    showToast('Could not join stream');
-    navigate('live');
-  }
-}
+function joinStream() { showToast("Live viewing is not available yet."); }
 
-// Live functions moved above
-
-function sendComment(){const i=document.getElementById('li');if(!i||!i.value.trim())return;addComment('You',i.value.trim());i.value='';}
-function addComment(u,t){const el=document.getElementById('live-comments');if(!el)return;const d=document.createElement('div');d.className='live-comment';d.innerHTML=`<span class="lc-user">${u}</span><span class="lc-text">${t}</span>`;el.appendChild(d);while(el.children.length>5)el.firstChild.remove();}
-function toggleGiftTray(){S.giftTrayOpen=!S.giftTrayOpen;const w=document.getElementById('gift-tray-wrap');if(w)w.style.display=S.giftTrayOpen?'block':'none';}
-
-function sendGift(name,icon,cost,color,sender){
-  if(!sender){
-    if(S.coins<cost){showToast('Not enough coins! Tap Buy to get more 🪙');showCoinsModal();return;}
-    S.coins-=cost;
-    const cn=document.getElementById('cn');if(cn)cn.textContent=S.coins;
-    // Update coins in Supabase
-    if(S.user){sb.from('profiles').update({coins:S.coins}).eq('id',S.user.id);}
-  }
-  const s=sender||{name:S.profile?.display_name||'You',avatar:'😊'};
-  if(!S.topGifters[s.name])S.topGifters[s.name]={coins:0,avatar:s.avatar};
-  S.topGifters[s.name].coins+=cost;
-  updateTopGifters();
-  S.viewerCount+=Math.floor(Math.random()*4+2);
-  const vc=document.getElementById('vc');if(vc)vc.textContent=S.viewerCount.toLocaleString();
-  addComment(s.name,`sent ${icon} ${name}!`);
-  if(name==='GLORY'||name==='Kingdom')showLegendary(icon,name,s,color);
-  else floatGift(icon,name,s,color);
-  if(!sender)showToast(`${icon} ${name} sent!`);
-}
-function floatGift(icon,name,s,color){
-  const ov=document.getElementById('gift-ov');if(!ov)return;
-  const el=document.createElement('div');el.className='gift-float-card';
-  el.style.cssText=`bottom:${150+Math.random()*50}px;left:${8+Math.random()*18}px;border-color:${color};`;
-  el.innerHTML=`<div class="gfc-av">${s.avatar}</div><div><div class="gfc-sender">${s.name}</div><div class="gfc-msg" style="color:${color}">sent ${name}!</div></div><div class="gfc-emoji">${icon}</div>`;
-  ov.appendChild(el);setTimeout(()=>el.remove(),3000);
-}
-function showLegendary(icon,name,s,color){
-  const ov=document.getElementById('legend-ov');if(!ov)return;
-  ov.innerHTML=`<div style="text-align:center;animation:legendaryIn 3.2s ease forwards;pointer-events:none;">
-    <div style="font-size:96px;filter:drop-shadow(0 0 50px ${color});">${icon}</div>
-    <div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:${color};text-shadow:0 0 40px ${color};margin:8px 0;">${name.toUpperCase()}</div>
-    <div style="background:rgba(0,0,0,.8);border:1px solid ${color}50;border-radius:20px;padding:8px 22px;display:inline-block;font-size:13px;">${s.avatar} ${s.name} sent this!</div>
-  </div>`;
-  floatGift(icon,name,s,color);
-  setTimeout(()=>{const o=document.getElementById('legend-ov');if(o)o.innerHTML='';},3300);
-}
-function updateTopGifters(){
-  const el=document.getElementById('live-tg');if(!el)return;
-  const sorted=Object.entries(S.topGifters).sort((a,b)=>b[1].coins-a[1].coins).slice(0,3);
-  el.innerHTML=sorted.map(([name,d],i)=>`<div class="tg-card"><span class="tg-rank">${['🥇','🥈','🥉'][i]}</span><span class="tg-av">${d.avatar}</span><div><div class="tg-nm">${name}</div><div class="tg-coins">🪙${d.coins.toLocaleString()}</div></div></div>`).join('');
-}
-function startGiftAuto(){
-  stopGiftAuto();
-  function drop(){if(S.tab!=='live')return;const g=GIFTS[Math.floor(Math.random()*(GIFTS.length-1))];const s=SENDERS[Math.floor(Math.random()*SENDERS.length)];sendGift(g.name,g.icon,g.coins,g.color,s);S.giftAuto=setTimeout(drop,1400+Math.random()*3200);}
-  S.giftAuto=setTimeout(drop,1200);
-}
-function stopGiftAuto(){if(S.giftAuto){clearTimeout(S.giftAuto);S.giftAuto=null;}}
-function startViewerUpdater(){const iv=setInterval(()=>{if(S.tab!=='live'){clearInterval(iv);return;}S.viewerCount+=Math.floor(Math.random()*7-2);if(S.viewerCount<1800)S.viewerCount=1800;const vc=document.getElementById('vc');if(vc)vc.textContent=S.viewerCount.toLocaleString();},3000);}
+function stopGiftAuto() { if (S.giftAuto) clearTimeout(S.giftAuto); S.giftAuto=null; }
 
 // ═══════════════════════════════════════════════════════
 // COINS MODAL — Stripe
@@ -1162,7 +1015,7 @@ function showCoinsModal() {
       <div class="modal-ttl">🪙 Buy Coins</div>
       <button onclick="document.getElementById('coins-modal').remove()" style="background:var(--glass);border:1px solid var(--border);border-radius:50%;width:30px;height:30px;color:var(--muted);cursor:pointer;font-size:16px;">×</button>
     </div>
-    <div class="modal-sub">Use coins to send gifts during live streams</div>
+    <div class="modal-sub">Coin purchases and gifting are not available yet.</div>
     <div class="coin-grid" id="coin-grid">
       ${COIN_PACKAGES.map(pkg=>`
       <div class="coin-pkg" id="pkg-${pkg.id}" onclick="selectPkg('${pkg.id}')">
@@ -1173,7 +1026,7 @@ function showCoinsModal() {
       </div>`).join('')}
     </div>
     <button class="btn btn-teal btn-full" onclick="purchaseCoins()" id="buy-btn">Select a package</button>
-    <div style="text-align:center;margin-top:10px;font-size:10px;color:var(--dim);">Secure payment via Stripe · Platform keeps 80%</div>
+    <div style="text-align:center;margin-top:10px;font-size:10px;color:var(--dim);">No payment will be taken.</div>
   </div>`;
   el.addEventListener('click', e=>{ if(e.target===el) el.remove(); });
   document.body.appendChild(el);
@@ -1187,50 +1040,14 @@ function selectPkg(id) {
   if(btn && selectedPkg) btn.textContent = `Buy ${selectedPkg.coins.toLocaleString()} coins for $${selectedPkg.price}`;
 }
 
-async function purchaseCoins() {
-  if(!selectedPkg){ showToast('Please select a package'); return; }
-  if(!S.user){ showToast('Please sign in first'); return; }
-  // Stripe checkout — in production this calls your backend to create a checkout session
-  showToast('🔗 Connecting to Stripe...');
-  try {
-    // This creates a Stripe checkout session via your backend
-    // Developer: Create /api/create-checkout-session endpoint
-    const response = await fetch('/api/create-checkout-session', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        package_id: selectedPkg.id,
-        user_id: S.user.id,
-        coins: selectedPkg.coins,
-        price: selectedPkg.price,
-      }),
-    });
-    const session = await response.json();
-    if(session.url) {
-      window.location.href = session.url;
-    } else {
-      // Demo mode — add coins directly
-      S.coins += selectedPkg.coins;
-      await sb.from('profiles').update({coins:S.coins}).eq('id',S.user.id);
-      document.getElementById('coins-modal')?.remove();
-      showToast(`✅ ${selectedPkg.coins.toLocaleString()} coins added!`);
-      const cn=document.getElementById('cn');if(cn)cn.textContent=S.coins;
-    }
-  } catch(e) {
-    // Demo mode
-    S.coins += selectedPkg.coins;
-    document.getElementById('coins-modal')?.remove();
-    showToast(`✅ ${selectedPkg.coins.toLocaleString()} coins added! (demo mode)`);
-    const cn=document.getElementById('cn');if(cn)cn.textContent=S.coins;
-  }
-}
+function purchaseCoins() { showToast("Coin purchases are not available yet. No payment has been taken."); }
 
 // ═══════════════════════════════════════════════════════
 // SHOP — loads from Supabase
 // ═══════════════════════════════════════════════════════
 async function fetchShopItems() {
   try {
-    const { data } = await sb.from('shop_items').select('*, profiles(display_name,username)').eq('active',true).order('sales',{ascending:false});
+    const { data } = await sb.from('shop_items').select('id,creator_id,name,description,price,type,icon,cover_url,sales,active,created_at,profiles(display_name,username)').eq('active',true).order('sales',{ascending:false});
     if(data && data.length>0) S.shopItems = data;
     else S.shopItems = DEMO_SHOP;
   } catch { S.shopItems = DEMO_SHOP; }
@@ -1244,12 +1061,12 @@ function renderShop(p) {
   p.innerHTML=`
   <div class="page-hdr" style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
     <div>
-      <div class="page-title" style="font-family:'Playfair Display',serif;"><span style="color:var(--teal);">Authority</span>Shop</div>
-      <div class="page-sub" style="margin-bottom:0;">Creator marketplace</div>
+      <h1 class="page-title" style="font-family:'Playfair Display',serif;"><span style="color:var(--teal);">Authority</span>Shop</h1>
+      <div class="page-sub" style="margin-bottom:0;">Marketplace preview — checkout is not available yet</div>
     </div>
-    <div style="position:relative;cursor:pointer;padding-top:4px;" onclick="showToast('Cart: ${A.cartCount} items')">
+    <div style="position:relative;cursor:pointer;padding-top:4px;" onclick="showToast('Cart: ${S.cartCount} items')">
       <span style="font-size:28px;">🛍️</span>
-      ${A.cartCount>0?`<div style="position:absolute;top:-2px;right:-4px;width:17px;height:17px;border-radius:50%;background:var(--pink);font-size:9px;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--black);">${A.cartCount}</div>`:''}
+      ${S.cartCount>0?`<div style="position:absolute;top:-2px;right:-4px;width:17px;height:17px;border-radius:50%;background:var(--pink);font-size:9px;color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--black);">${S.cartCount}</div>`:''}
     </div>
   </div>
   <div class="shop-filters">
@@ -1258,25 +1075,21 @@ function renderShop(p) {
   <div class="shop-grid">
     ${filtered.map((item,i)=>`
     <div class="shop-card" style="animation-delay:${i*.06}s">
-      <div class="sc-thumb">${item.icon||'📦'}</div>
+      <div class="sc-thumb">${escapeHTML(item.icon||'📦')}</div>
       <div class="sc-body">
-        <div class="sc-name">${item.name}</div>
-        <div class="sc-creator">by ${item.profiles?.display_name||item.creator||'Creator'}</div>
+        <div class="sc-name">${escapeHTML(item.name)}</div>
+        <div class="sc-creator">by ${escapeHTML(item.profiles?.display_name||item.creator||'Creator')}</div>
         <div class="sc-bottom">
-          <span class="sc-price">$${item.price}</span>
-          <button class="sc-add" onclick="addToCart('${item.name}',${item.price})">+</button>
+          <span class="sc-price">$${escapeHTML(item.price)}</span>
+          <button aria-label="Shop checkout unavailable" class="sc-add" onclick="addToCart(${jsArg(item.name)},${count(item.price)})">+</button>
         </div>
-        <div class="sc-split">Creator 77% · Platform 20% · Stripe 3%</div>
+        <div class="sc-split">Preview only · Not available for purchase</div>
       </div>
     </div>`).join('')}
   </div>`;
 }
 
-async function addToCart(name, price) {
-  A.cartCount++;
-  showToast(`✅ ${name} added to cart`);
-  render();
-}
+function addToCart() { showToast('Shop checkout is not available yet. No order has been placed.'); }
 
 // ═══════════════════════════════════════════════════════
 // WEALTH — loads from Supabase
@@ -1291,16 +1104,17 @@ async function fetchWalletData() {
 
 function renderWealth(p) {
   fetchWalletData().then(wallet=>{
-    const balance = wallet?.balance || 0;
-    const totalEarned = wallet?.total_earned || 0;
+    if (S.tab !== 'wealth' || S.subPage) return;
+    const balance = count(wallet?.balance);
+    const totalEarned = count(wallet?.total_earned);
     const locked = wallet?.locked !== false;
-    const followers = S.profile?.followers || 0;
+    const followers = count(S.profile?.followers);
     const gate = 5000;
     const pct = Math.min(Math.round((followers/gate)*100),100);
 
     p.innerHTML=`
     <div class="page-hdr">
-      <div class="page-title" style="font-family:'Playfair Display',serif;background:linear-gradient(90deg,var(--gold),var(--gold3),var(--teal2),var(--gold));background-size:300% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;">WealthShift</div>
+      <h1 class="page-title" style="font-family:'Playfair Display',serif;background:linear-gradient(90deg,var(--gold),var(--gold3),var(--teal2),var(--gold));background-size:300% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;">WealthShift</h1>
       <div class="page-sub">"He gives you the ability to produce wealth." — Deut. 8:18</div>
     </div>
     <div class="wealth-hero">
@@ -1329,25 +1143,14 @@ function renderWealth(p) {
       ${!locked&&balance>=50?`
       <button class="btn btn-teal btn-full" onclick="requestWithdrawal()" style="margin-bottom:8px;">💸 Request Withdrawal</button>`:''}
       <div style="font-size:11px;color:var(--dim);text-align:center;line-height:1.6;">
-        Withdrawals paid on the 15th · $50 minimum · 5,000 followers required<br/>
-        <span style="color:var(--teal);">Powered by Stripe Connect</span>
+        Withdrawals are not available yet. Contact support about existing balances.<br/>
+        <span style="color:var(--teal);">No payout requests are accepted through this website yet.</span>
       </div>
     </div>`;
   });
 }
 
-async function requestWithdrawal() {
-  if(!S.user){ showToast('Please sign in first'); return; }
-  const { error } = await sb.from('withdrawal_requests').insert({
-    creator_id: S.user.id,
-    amount: 50,
-    method: 'stripe',
-    status: 'pending',
-    requested_at: new Date().toIso8601String?.() || new Date().toISOString(),
-  });
-  if(error) showToast('Error submitting request');
-  else showToast('💸 Withdrawal request submitted! Paid on the 15th.');
-}
+function requestWithdrawal() { showToast("Withdrawals are not available yet. Contact support for assistance."); }
 
 // ═══════════════════════════════════════════════════════
 // SAFE
@@ -1373,9 +1176,15 @@ function renderSafe(p){
         <div><div style="font-size:13px;font-weight:600;">${r.label}</div><div style="font-size:11px;color:var(--muted)">${r.desc}</div></div></div>`).join('')}
     </div>
     <div style="background:rgba(233,30,140,.06);border:1px solid rgba(233,30,140,.15);border-radius:14px;padding:16px;margin-bottom:12px;">
-      <div class="sec-title" style="color:var(--pink);margin-bottom:9px;">🚨 Anonymous Report</div>
-      <div style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:12px;">See a violation? Report anonymously. The person will never know it was you.</div>
-      <button class="btn btn-pink btn-full" onclick="submitReport()">Submit Anonymous Report</button>
+      <div class="sec-title" style="color:var(--pink);margin-bottom:9px;">🚨 Report a Concern</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:12px;">Reports are linked to your account for review and are not shown to the reported person. For urgent concerns, email kingdomshiftmedia@gmail.com.</div>
+      <form id="report-form" onsubmit="event.preventDefault();submitReport()">
+        <label class="label" for="report-type">Concern</label><select class="input" id="report-type"><option value="other">Community violation</option><option value="child_safety">Child safety</option><option value="harassment">Harassment</option></select>
+        <label class="label" for="report-url">Content or profile URL</label><input class="input" id="report-url" type="url" maxlength="2048" required/>
+        <label class="label" for="report-details">What happened?</label><textarea class="input" id="report-details" minlength="10" maxlength="4000" required></textarea>
+        <button class="btn btn-pink btn-full" id="report-submit" type="submit">Submit Report</button>
+        <p id="report-status" role="status"></p>
+      </form>
     </div>
     <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;">
       <div class="sec-title" style="margin-bottom:10px;">📞 Crisis Lines</div>
@@ -1388,21 +1197,32 @@ function renderSafe(p){
         {flag:'🌍',name:'Befrienders Worldwide',num:'befrienders.org'},
       ].map(l=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
         <div><div style="font-size:12px;font-weight:700;">${l.flag} ${l.name}</div><div style="font-size:11px;color:var(--gold)">${l.num}</div></div>
-        <a href="tel:${l.num}" class="btn btn-glass btn-sm">Call</a></div>`).join('')}
+        <a href="${l.num==='befrienders.org'?'https://befrienders.org':'tel:'+l.num.replace(/[^+0-9]/g,'')}" class="btn btn-glass btn-sm">${l.num==='befrienders.org'?'Visit':'Call'}</a></div>`).join('')}
     </div>
   </div>`;
 }
 
 async function submitReport() {
-  if(!S.user){ showToast('Please sign in first'); return; }
-  const { error } = await sb.from('reports').insert({
-    reporter_id: S.user.id,
-    reported_id: S.user.id, // placeholder
-    type: 'other',
-    status: 'pending',
-    priority: 'normal',
-  });
-  showToast('🚨 Report submitted anonymously. Thank you.');
+  const status = document.getElementById('report-status');
+  const button = document.getElementById('report-submit');
+  if (!S.user) { status.textContent = 'Please sign in to submit a report, or email support.'; return; }
+  const form = document.getElementById('report-form');
+  if (!form.reportValidity()) return;
+  if (button.disabled) return;
+  button.disabled = true;
+  try {
+    const { error } = await sb.from('reports').insert({
+      reporter_id:S.user.id, reported_id:null,
+      type:document.getElementById('report-type').value,
+      content_url:document.getElementById('report-url').value.trim(),
+      details:document.getElementById('report-details').value.trim(),
+      status:'pending', priority:'normal'
+    });
+    if (error) throw error;
+    form.reset(); status.textContent = 'Report received for review.';
+  } catch {
+    status.textContent = 'Your report could not be sent. Please retry or email kingdomshiftmedia@gmail.com.';
+  } finally { button.disabled = false; }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1424,10 +1244,10 @@ function renderBattles(p){
       {id:'wisdom',icon:'👑',name:'Wisdom Duel',desc:'Proverbs & wisdom'},
       {id:'faith',icon:'🔥',name:'Faith Challenge',desc:'Kingdom principles'},
       {id:'slam',icon:'⚡',name:'Sermon Slam',desc:'10 second lightning round'},
-    ].map(m=>`<div class="mode-tile" onclick="startBattle('${m.id}','${m.name}')">
+    ].map(m=>`<button type="button" class="mode-tile" onclick="startBattle('${m.id}','${m.name}')">
       <div class="mt-icon">${m.icon}</div>
       <div class="mt-name">${m.name}</div>
-      <div class="mt-desc">${m.desc}</div></div>`).join('')}
+      <div class="mt-desc">${m.desc}</div></button>`).join('')}
   </div>
   <div style="padding:0 14px 20px;">
     <div class="sec-title">Global Leaderboard</div>
@@ -1512,17 +1332,7 @@ function answerQ(idx){
   setTimeout(()=>{s.idx++;if(s.idx>=s.qs.length){S.battleView='result';saveBattleScore();}else{s.answered=false;s.selected=null;s.seconds=S.gameMode?.id==='slam'?10:30;}render();if(S.battleView==='game')startQuizTimer();},correct?1200:1600);
 }
 
-async function saveBattleScore(){
-  if(!S.user||!S.quizState) return;
-  await sb.from('battle_scores').insert({
-    user_id: S.user.id,
-    mode: S.gameMode?.id||'bible',
-    score: S.quizState.score,
-    questions: S.quizState.qs.length,
-    correct: S.quizState.qs.filter((_,i)=>i<S.quizState.idx).length,
-    streak: S.quizState.streak,
-  });
-}
+function saveBattleScore() { /* Practice scores are local and confer no rewards. */ }
 
 function startQuizTimer(){
   clearQuizTimer();
@@ -1559,60 +1369,37 @@ function renderProfile(p){
   const u = S.profile;
   p.innerHTML=`
   <div class="profile-cover">
-    <div class="profile-av">${u?.avatar||'👤'}</div>
+    <div class="profile-av">${escapeHTML(u?.avatar||'👤')}</div>
     <button class="profile-edit-btn" onclick="showToast('Edit profile coming soon')">Edit Profile</button>
   </div>
   <div class="profile-info">
-    <div class="profile-name">${u?.display_name||'Your Name'} <span style="color:var(--teal);font-size:13px;">${u?.verified?'✓':''}</span></div>
-    <div class="profile-handle">@${u?.username||'yourhandle'} · ${u?.email||''}</div>
-    <div class="profile-bio">${u?.bio||'"Equipping believers to walk in Kingdom authority 👑"'}</div>
+    <div class="profile-name">${escapeHTML(u?.display_name||'Your Name')} <span style="color:var(--teal);font-size:13px;">${u?.verified?'✓':''}</span></div>
+    <div class="profile-handle">@${escapeHTML(u?.username||'yourhandle')} · ${escapeHTML(u?.email||'')}</div>
+    <div class="profile-bio">${escapeHTML(u?.bio||'"Equipping believers to walk in Kingdom authority 👑"')}</div>
     <div class="profile-stats-grid">
       ${[{n:(u?.followers||0).toLocaleString(),l:'Followers'},{n:(u?.following||0).toLocaleString(),l:'Following'},{n:(u?.videos||0).toLocaleString(),l:'Videos'}].map(s=>`
       <div class="ps-card"><div class="ps-num">${s.n}</div><div class="ps-lbl">${s.l}</div></div>`).join('')}
     </div>
   </div>
-  <div class="pro-card">
-    <div class="pro-hdr">
-      <span class="pro-title">${S.isPro?'👑 Creator Pro Active':'⚙️ Creator Pro'}</span>
-      ${!S.isPro?'<span style="font-size:12px;color:var(--muted);">$19/month</span>':''}
-    </div>
-    ${!S.isPro?`<div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px;">Simulcast, analytics, unlimited shop, priority CDN and more.</div>
-    <button class="btn btn-gold btn-full" onclick="upgradeCreatorPro()">Upgrade to Creator Pro</button>`
-    :`<div style="font-size:12px;color:var(--muted)">✓ Simulcast · ✓ Analytics · ✓ Unlimited Shop · ✓ Priority CDN</div>`}
-    <div style="font-size:10px;color:var(--dim);margin-top:8px;">Platform keeps 100% · Funds infrastructure · Powered by Stripe</div>
-  </div>
+  <div class="pro-card"><h2 class="pro-title">Creator Pro</h2><p>New subscriptions are not available yet.</p></div>
   <div style="padding:0 14px;">
     <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;">
-      <div class="list-row" onclick="navigate('settings','notification_settings')">
+      <button type="button" class="list-row" onclick="navigate('settings','notification_settings')">
         <div style="font-size:18px;width:30px;text-align:center;">🔔</div>
         <div style="flex:1;"><div style="font-size:13px;font-weight:600;">Notifications</div></div>
         <div style="color:var(--dim);font-size:16px;">›</div>
-      </div>
-      <div class="list-row" onclick="navigate('settings')">
+      </button>
+      <button type="button" class="list-row" onclick="navigate('settings')">
         <div style="font-size:18px;width:30px;text-align:center;">⚙️</div>
         <div style="flex:1;"><div style="font-size:13px;font-weight:600;">Settings</div></div>
         <div style="color:var(--dim);font-size:16px;">›</div>
-      </div>
+      </button>
     </div>
     <button class="btn btn-glass btn-full" style="margin:14px 0;color:var(--red);border-color:rgba(255,68,68,.2);" onclick="handleSignOut()">🚪 Sign Out</button>
   </div>`;
 }
 
-async function upgradeCreatorPro() {
-  showToast('🔗 Connecting to Stripe...');
-  try {
-    const response = await fetch('/api/create-pro-session', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({user_id: S.user?.id}),
-    });
-    const session = await response.json();
-    if(session.url) window.location.href = session.url;
-    else { S.isPro=true; showToast('👑 Creator Pro activated!'); render(); }
-  } catch {
-    S.isPro=true; showToast('👑 Creator Pro activated! (demo)'); render();
-  }
-}
+function upgradeCreatorPro() { showToast("Creator Pro purchases are not available yet. No payment has been taken."); }
 
 // ═══════════════════════════════════════════════════════
 // SETTINGS
@@ -1620,7 +1407,7 @@ async function upgradeCreatorPro() {
 function renderSettings(p){
   p.innerHTML=`
   <div class="page-hdr">
-    <div class="page-title" style="font-family:'Playfair Display',serif;">Settings</div>
+    <h1 class="page-title" style="font-family:'Playfair Display',serif;">Settings</h1>
     <div class="page-sub">Manage your KingdomShift.Live account</div>
   </div>
   ${[
@@ -1644,7 +1431,7 @@ function renderSettings(p){
       {icon:'🛡️',label:'Child Safety Standards',sub:'child_safety'},
     ]},
     {title:'SUPPORT',items:[
-      {icon:'💬',label:'Contact Support',desc:'support@kingdomshift.live'},
+      {icon:'💬',label:'Contact Support',desc:'kingdomshiftmedia@gmail.com'},
       {icon:'ℹ️',label:'About',desc:'KingdomShift.Live v1.0.0'},
     ]},
   ].map(group=>`
@@ -1652,11 +1439,11 @@ function renderSettings(p){
     <div class="sg-title">${group.title}</div>
     <div class="sg-body">
       ${group.items.map(item=>`
-      <div class="sr" onclick="${item.sub?`navigate('settings','${item.sub}')`:` showToast('Opening ${item.label}')`}">
+      <button type="button" class="sr" onclick="${item.sub?`navigate('settings','${item.sub}')`:` showToast('This feature is not available yet')`}">
         <div class="sr-icon">${item.icon}</div>
-        <div style="flex:1;"><div class="sr-label">${item.label}</div>${item.desc?`<div class="sr-desc">${item.desc}</div>`:''}</div>
+        <div style="flex:1;"><div class="sr-label">${item.label}</div>${item.desc?`<div class="sr-desc">${escapeHTML(item.desc)}</div>`:''}</div>
         <span class="sr-arrow">›</span>
-      </div>`).join('')}
+      </button>`).join('')}
     </div>
   </div>`).join('')}
   <div style="padding:0 14px 80px;">
@@ -1670,7 +1457,7 @@ function renderSettings(p){
 function renderNotifSettings(p){
   const ns=S.notifSettings;
   p.innerHTML=`
-  <div class="back-bar"><button class="back-btn" onclick="navigate('profile')">‹</button>
+  <div class="back-bar"><button aria-label="Back" class="back-btn" onclick="navigate('profile')">‹</button>
   <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;">Notifications</div></div>
   <div class="settings-group">
     <div class="sg-title">ACTIVITY</div>
@@ -1683,17 +1470,13 @@ function renderNotifSettings(p){
       ].map(item=>`
       <div class="sr" style="cursor:default;">
         <div class="sr-icon">${item.icon}</div>
-        <div style="flex:1;"><div class="sr-label">${item.label}</div><div class="sr-desc">${item.desc}</div></div>
-        <button class="toggle ${ns[item.key]?'on':'off'}" onclick="toggleNotif('${item.key}')"><div class="toggle-knob"></div></button>
+        <div style="flex:1;"><div class="sr-label">${item.label}</div><div class="sr-desc">${escapeHTML(item.desc)}</div></div>
+        <button role="switch" aria-label="${escapeHTML(item.label)}" aria-checked="${!!ns[item.key]}" class="toggle ${ns[item.key]?'on':'off'}" onclick="toggleNotif('${item.key}')"><div class="toggle-knob"></div></button>
       </div>`).join('')}
     </div>
   </div>`;
 }
-function toggleNotif(key){
-  S.notifSettings[key]=!S.notifSettings[key];
-  if(S.user){sb.from('profiles').update({notif_settings:S.notifSettings}).eq('id',S.user.id);}
-  showToast(S.notifSettings[key]?'✅ Enabled':'🔕 Disabled');render();
-}
+async function toggleNotif(key) { await saveSetting('notifSettings','notif_settings',key); }
 
 // ═══════════════════════════════════════════════════════
 // PRIVACY SETTINGS
@@ -1701,29 +1484,34 @@ function toggleNotif(key){
 function renderPrivacySettings(p){
   const ps=S.privacySettings;
   p.innerHTML=`
-  <div class="back-bar"><button class="back-btn" onclick="navigate('settings')">‹</button>
+  <div class="back-bar"><button aria-label="Back" class="back-btn" onclick="navigate('settings')">‹</button>
   <div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;">Privacy</div></div>
   <div class="settings-group">
     <div class="sg-title">ACCOUNT PRIVACY</div>
     <div class="sg-body">
       ${[
-        {key:'privateAccount',icon:'🔒',label:'Private Account',desc:'Only approved followers see content'},
-        {key:'showOnline',icon:'🟢',label:'Show Online Status',desc:'Let others see when you\'re active'},
-        {key:'allowMessages',icon:'💬',label:'Allow Messages',desc:'Receive direct messages'},
-        {key:'allowComments',icon:'📝',label:'Allow Comments',desc:'Let viewers comment'},
+        {key:'privateAccount',icon:'🔒',label:'Private Account',desc:'Only you can view your profile and published content'},
+
+
+
       ].map(item=>`
       <div class="sr" style="cursor:default;">
         <div class="sr-icon">${item.icon}</div>
-        <div style="flex:1;"><div class="sr-label">${item.label}</div><div class="sr-desc">${item.desc}</div></div>
-        <button class="toggle ${ps[item.key]?'on':'off'}" onclick="togglePrivacy('${item.key}')"><div class="toggle-knob"></div></button>
+        <div style="flex:1;"><div class="sr-label">${item.label}</div><div class="sr-desc">${escapeHTML(item.desc)}</div></div>
+        <button role="switch" aria-label="${escapeHTML(item.label)}" aria-checked="${!!ps[item.key]}" class="toggle ${ps[item.key]?'on':'off'}" onclick="togglePrivacy('${item.key}')"><div class="toggle-knob"></div></button>
       </div>`).join('')}
     </div>
   </div>`;
 }
-function togglePrivacy(key){
-  S.privacySettings[key]=!S.privacySettings[key];
-  if(S.user){sb.from('profiles').update({privacy_settings:S.privacySettings}).eq('id',S.user.id);}
-  showToast(S.privacySettings[key]?'✅ Enabled':'Disabled');render();
+async function togglePrivacy(key) { await saveSetting('privacySettings','privacy_settings',key); }
+async function saveSetting(stateKey, column, key) {
+  if (!S.user) { showToast('Please sign in first'); return; }
+  const next = {...S[stateKey], [key]:!S[stateKey][key]};
+  try {
+    const { error } = await sb.from('profiles').update({[column]:next}).eq('id',S.user.id);
+    if (error) throw error;
+    S[stateKey] = next; showToast('Settings saved'); render();
+  } catch { showToast('Settings could not be saved. Please retry.'); }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1732,119 +1520,82 @@ function togglePrivacy(key){
 function renderSearch(p){
   p.innerHTML=`
   <div class="page-hdr">
-    <div class="page-title" style="font-family:'Playfair Display',serif;">Discover</div>
+    <h1 class="page-title" style="font-family:'Playfair Display',serif;">Discover</h1>
     <div class="page-sub">Find creators, content, and community</div>
-    <input class="input" placeholder="Search creators, topics..." id="search-input"
+    <input class="input" placeholder="Search creators, topics..." aria-label="Search creators" id="search-input"
       oninput="searchContent(this.value)" style="margin-bottom:14px;"/>
   </div>
   <div style="padding:0 14px;">
     <div class="sec-title">Trending Topics</div>
     <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px;">
       ${['#Faith','#WealthShift','#Kingdom','#Worship','#Prayer','#Bible','#Ministry','#Purpose'].map(t=>`
-      <span class="tag tag-teal" style="cursor:pointer;padding:6px 13px;font-size:11px;" onclick="showToast('Browsing ${t}')">${t}</span>`).join('')}
+      <span class="tag tag-teal" style="padding:6px 13px;font-size:11px;">${t}</span>`).join('')}
     </div>
     <div class="sec-title">Suggested Creators</div>
     <div id="search-results" style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;">
       ${DEMO_POSTS.slice(0,4).map(post=>`<div class="list-row">
         <div style="font-size:20px;">${post.avatar}</div>
         <div style="flex:1;"><div style="font-size:13px;font-weight:700;">${post.user}${post.verified?' ✓':''}</div><div style="font-size:11px;color:var(--muted)">${post.handle}</div></div>
-        <button class="btn btn-glass btn-sm" onclick="showToast('Following ${post.user}')">Follow</button>
+        <button class="btn btn-glass btn-sm" onclick="showToast('Following from search is not available yet')">Follow</button>
       </div>`).join('')}
     </div>
   </div>`;
 }
 
 async function searchContent(q) {
-  if(!q||q.length<2) return;
+  const el = document.getElementById('search-results');
+  q = String(q || '').replace(/[^a-zA-Z0-9_ ]/g,'').trim().slice(0,80);
+  S.searchQuery = q;
+  if(!q || q.length<2) { if(el) el.textContent='Enter at least two characters.'; return; }
   try {
     const { data } = await sb.from('profiles')
       .select('id,username,display_name,avatar,verified')
       .or(`username.ilike.%${q}%,display_name.ilike.%${q}%`)
       .limit(10);
-    const el = document.getElementById('search-results');
+    if (S.searchQuery !== q || !el?.isConnected) return;
+    if (!data?.length) { el.textContent='No creators found.'; return; }
     if(el && data && data.length>0){
       el.innerHTML = data.map(u=>`<div class="list-row">
-        <div style="font-size:20px;">${u.avatar||'👤'}</div>
-        <div style="flex:1;"><div style="font-size:13px;font-weight:700;">${u.display_name||u.username}${u.verified?' ✓':''}</div><div style="font-size:11px;color:var(--muted)">@${u.username}</div></div>
-        <button class="btn btn-glass btn-sm" onclick="showToast('Following ${u.display_name||u.username}')">Follow</button>
+        <div style="font-size:20px;">${escapeHTML(u.avatar||'👤')}</div>
+        <div style="flex:1;"><div style="font-size:13px;font-weight:700;">${escapeHTML(u.display_name||u.username)}${u.verified?' ✓':''}</div><div style="font-size:11px;color:var(--muted)">@${escapeHTML(u.username)}</div></div>
+        <button class="btn btn-glass btn-sm" onclick="showToast('Following from search is not available yet')">Follow</button>
       </div>`).join('');
     }
-  } catch(e) {}
+  } catch(e) { if(el?.isConnected) el.textContent='Search is unavailable. Please retry.'; }
 }
 
 // ═══════════════════════════════════════════════════════
 // ADMIN
 // ═══════════════════════════════════════════════════════
-function renderAdmin(p){
-  p.innerHTML=`
-  <div class="page-hdr">
-    <div class="page-title" style="font-family:'Playfair Display',serif;">Admin Panel</div>
-    <div class="page-sub">KingdomShift.Live · Platform Control</div>
-    <div style="display:flex;align-items:center;gap:7px;background:rgba(29,185,84,.06);border:1px solid rgba(29,185,84,.15);border-radius:10px;padding:9px 13px;margin-bottom:14px;">
-      <div style="width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s ease infinite;"></div>
-      <span style="font-size:11px;font-weight:700;color:var(--green);">PLATFORM ONLINE</span>
-      <span style="margin-left:auto;font-size:11px;color:var(--muted);">Supabase Connected ✅</span>
-    </div>
-  </div>
-  <div class="admin-stats">
-    ${[
-      {icon:'💰',num:`$${Math.floor(A.liveRevenue).toLocaleString()}`,label:'REVENUE'},
-      {icon:'🔴',num:'Live',label:'STREAMING'},
-      {icon:'🪙',num:S.coins,label:'YOUR COINS'},
-      {icon:'🚨',num:'0',label:'REPORTS'},
-      {icon:'✅',num:'DB',label:'SUPABASE'},
-      {icon:'💳',num:'ON',label:'STRIPE'},
-    ].map(s=>`<div class="asc"><div class="asc-icon">${s.icon}</div><div class="asc-num">${s.num}</div><div class="asc-lbl">${s.label}</div></div>`).join('')}
-  </div>
-  <div style="padding:0 14px;">
-    ${[
-      {icon:'🎁',label:'Gift System',badge:null,rows:[['Platform split','80% Platform · 20% Creator'],['Active gifts','8 tiers'],['Coins value','$0.01 per coin']]},
-      {icon:'🪙',label:'Coin Packages',badge:null,rows:[['Packages','6 active'],['Platform keeps','80%'],['Stripe fee','2.9%']]},
-      {icon:'💸',label:'Payouts',badge:null,rows:[['Gate','5,000 followers'],['Minimum','$50'],['Payout date','15th monthly']]},
-      {icon:'🔐',label:'Auth',badge:null,rows:[['Provider','Supabase Auth'],['Status','✅ Connected'],['URL',SUPABASE_URL.slice(0,30)+'...']]},
-      {icon:'💳',label:'Stripe',badge:null,rows:[['Status','✅ Connected'],['Mode',STRIPE_KEY.includes('test')?'Test Mode':'Live Mode'],['Key',STRIPE_KEY.slice(0,20)+'...']]},
-      {icon:'📡',label:'ZegoCloud',badge:null,rows:[['App ID',ZID],['Status','✅ Connected'],['Free quota','10K min/month']]},
-    ].map(sec=>`
-    <div class="admin-sec" onclick="showToast('Opening ${sec.label}...')">
-      <div class="as-hdr">
-        <span class="as-hdr-icon">${sec.icon}</span>
-        <span class="as-hdr-label">${sec.label}</span>
-        ${sec.badge?`<span class="as-hdr-badge">${sec.badge}</span>`:''}
-        <span style="color:var(--dim);font-size:16px;">›</span>
-      </div>
-      <div class="as-body">
-        ${sec.rows.map(([l,v])=>`<div class="as-row"><span class="as-row-lbl">${l}</span><span class="as-row-val" style="font-size:11px;">${v}</span></div>`).join('')}
-      </div>
-    </div>`).join('')}
-  </div>
-  <div style="height:40px;"></div>`;
+function renderAdmin(p) {
+  p.innerHTML = '<div class="page-hdr"><h1 class="page-title">Administration</h1><p>Administration is managed separately. This page does not grant administrative access.</p></div>';
 }
 
 // ═══════════════════════════════════════════════════════
 // LEGAL PAGES
 // ═══════════════════════════════════════════════════════
 function renderPrivacy(p){p.innerHTML=`
-  <div class="back-bar"><button class="back-btn" onclick="navigate('settings')">‹</button><div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;">Privacy Policy</div></div>
+  <div class="back-bar"><button aria-label="Back" class="back-btn" onclick="navigate('settings')">‹</button><div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;">Privacy Policy</div></div>
   <div class="legal-wrap">
-    <div class="legal-title">Privacy Policy</div>
-    <div class="legal-date">Last updated: June 2026 · KingdomShift Collective</div>
+    <h1 class="legal-title">Privacy Policy</h1>
+    <div class="legal-date">Last updated: June 2026 · KingdomShift Media Corp</div>
     ${[
-      ['1. Introduction','KingdomShift.Live is operated by KingdomShift Collective. This Privacy Policy explains how we collect, use, and protect your personal information.'],
+      ['1. Introduction','KingdomShift.Live is operated by KingdomShift Media Corp. This Privacy Policy explains how we collect, use, and protect your personal information.'],
       ['2. Information We Collect','We collect your name, email address, username, and profile information when you create an account. We also collect usage data such as content you view and interactions you make.'],
-      ['3. How We Use Your Information','We use your information to provide and improve our services. <strong>We will never sell your personal data to third parties.</strong> This is a permanent commitment of KingdomShift Collective.'],
+      ['3. How We Use Your Information','We use your information to provide and improve our services. <strong>We will never sell your personal data to third parties.</strong> This is a permanent commitment of KingdomShift Media Corp.'],
       ['4. Data Security','Your data is stored securely in Supabase and encrypted in transit and at rest.'],
       ['5. Your Rights','You may access, correct, or delete your personal information at any time through Settings.'],
-      ['6. Children\'s Privacy','KingdomShift.Live is not directed at children under 13. Contact support@kingdomshift.live with concerns.'],
-      ['7. Child Safety','We have zero tolerance for CSAM. All violations are reported immediately to NCMEC and relevant authorities.'],
-      ['8. Contact','support@kingdomshift.live'],
-    ].map(([h,t])=>`<div style="margin-bottom:18px;"><div class="legal-h2">${h}</div><p class="legal-p">${t}</p></div>`).join('')}
+      ['6. Children\'s Privacy','KingdomShift.Live is not directed at children under 13. Contact kingdomshiftmedia@gmail.com with concerns.'],
+      ['7. Child Safety','We have zero tolerance for CSAM. Child safety reports are reviewed and escalated to the appropriate authorities.'],
+      ['8. Contact','kingdomshiftmedia@gmail.com'],
+    ].map(([h,t])=>`<div style="margin-bottom:18px;"><h2 class="legal-h2">${h}</h2><p class="legal-p">${t}</p></div>`).join('')}
   </div>`;}
 
 function renderTerms(p){p.innerHTML=`
-  <div class="back-bar"><button class="back-btn" onclick="navigate('settings')">‹</button><div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;">Terms of Service</div></div>
+  <div class="back-bar"><button aria-label="Back" class="back-btn" onclick="navigate('settings')">‹</button><div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;">Terms of Service</div></div>
   <div class="legal-wrap">
-    <div class="legal-title">Terms of Service</div>
-    <div class="legal-date">Last updated: June 2026 · KingdomShift Collective</div>
+    <h1 class="legal-title">Terms of Service</h1>
+    <div class="legal-date">Last updated: June 2026 · KingdomShift Media Corp</div>
     ${[
       ['1. Acceptance','By creating an account you agree to these Terms.'],
       ['2. Eligibility','You must be at least 13 years old to use KingdomShift.Live.'],
@@ -1853,101 +1604,113 @@ function renderTerms(p){p.innerHTML=`
       ['5. Revenue','Rates are governed by the Creator Agreement. Rates never decrease.'],
       ['6. Termination','We may suspend accounts that violate these terms.'],
       ['7. Changes','We will notify all users with 60 days written notice before changes.'],
-    ].map(([h,t])=>`<div style="margin-bottom:18px;"><div class="legal-h2">${h}</div><p class="legal-p">${t}</p></div>`).join('')}
+    ].map(([h,t])=>`<div style="margin-bottom:18px;"><h2 class="legal-h2">${h}</h2><p class="legal-p">${t}</p></div>`).join('')}
   </div>`;}
 
 function renderCreatorAgreement(p){p.innerHTML=`
-  <div class="back-bar"><button class="back-btn" onclick="navigate('settings')">‹</button><div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;">Creator Agreement</div></div>
+  <div class="back-bar"><button aria-label="Back" class="back-btn" onclick="navigate('settings')">‹</button><div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;">Creator Agreement</div></div>
   <div class="legal-wrap">
-    <div class="legal-title">Creator Agreement</div>
-    <div class="legal-date">Last updated: June 2026 · KingdomShift Collective</div>
+    <h1 class="legal-title">Creator Agreement</h1>
+    <div class="legal-date">Last updated: June 2026 · KingdomShift Media Corp</div>
     ${[
       ['Platform Promise','KingdomShift.Live was built by one person with no investors and total faith. You only share revenue when you earn revenue.'],
       ['Revenue Splits','<strong>Live Gifts:</strong> Platform 80%, Creator 20%. <strong>AuthorityShop:</strong> Platform 20%, Creator 77%, Stripe 3%. <strong>Subscriptions:</strong> Platform 30%, Creator 62%, Stripe 8%. <strong>Tithes:</strong> Platform 5%, Ministry 95%.'],
       ['Withdrawal','5,000 followers required. $50 minimum. Paid on the 15th monthly.'],
       ['Locked Forever','These rates will never go down. 60 days written notice required for any change.'],
-    ].map(([h,t])=>`<div style="margin-bottom:18px;"><div class="legal-h2">${h}</div><p class="legal-p">${t}</p></div>`).join('')}
+    ].map(([h,t])=>`<div style="margin-bottom:18px;"><h2 class="legal-h2">${h}</h2><p class="legal-p">${t}</p></div>`).join('')}
     <div style="background:rgba(0,201,200,.05);border:1px solid rgba(0,201,200,.15);border-radius:12px;padding:16px;margin-top:8px;">
       <p style="font-family:'Crimson Text',serif;font-style:italic;color:var(--teal);margin-bottom:5px;">"He gives you the ability to produce wealth." — Deuteronomy 8:18</p>
-      <p style="font-size:12px;color:var(--dim);">KingdomShift Collective · Equip · Empower · Expand the Kingdom</p>
+      <p style="font-size:12px;color:var(--dim);">KingdomShift Media Corp · Equip · Empower · Expand the Kingdom</p>
     </div>
   </div>`;}
 
 function renderDeleteAccount(p){p.innerHTML=`
-  <div class="back-bar"><button class="back-btn" onclick="navigate('settings')">‹</button><div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--red);">Delete Account</div></div>
+  <div class="back-bar"><button aria-label="Back" class="back-btn" onclick="navigate('settings')">‹</button><div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--red);">Delete Account</div></div>
   <div style="padding:18px;">
     <div style="background:rgba(255,68,68,.06);border:1px solid rgba(255,68,68,.15);border-radius:14px;padding:22px;">
-      <p style="font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:18px;">To request deletion of your account and all associated data email us. Your account and all data will be permanently deleted within 30 days.</p>
+      <p style="font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:18px;">To request deletion of your account and all associated data email us. Your account and all data will be reviewed and processed within 30 days. Opening the email link does not send a request; send the email to contact support.</p>
       <div style="background:rgba(0,0,0,.3);border-radius:10px;padding:14px;text-align:center;margin-bottom:14px;">
-        <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--teal);">support@kingdomshift.live</div>
+        <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--teal);">kingdomshiftmedia@gmail.com</div>
         <div style="font-size:11px;color:var(--muted);margin-top:3px;">Subject: Account Deletion Request</div>
       </div>
-      <button class="btn btn-glass btn-full" style="color:var(--red);border-color:rgba(255,68,68,.2);" onclick="showToast('Deletion request sent to support@kingdomshift.live')">Send Deletion Request</button>
+      <a class="btn btn-glass btn-full" style="color:var(--red);border-color:rgba(255,68,68,.2);" href="mailto:kingdomshiftmedia@gmail.com?subject=Account%20Deletion%20Request">Open Email to Request Deletion</a>
     </div>
   </div>`;}
 
 function renderChildSafety(p){p.innerHTML=`
-  <div class="back-bar"><button class="back-btn" onclick="navigate('settings')">‹</button><div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--teal);">Child Safety</div></div>
+  <div class="back-bar"><button aria-label="Back" class="back-btn" onclick="navigate('settings')">‹</button><div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--teal);">Child Safety</div></div>
   <div class="legal-wrap">
-    <div class="legal-title" style="color:var(--teal);">Child Safety Standards</div>
+    <h1 class="legal-title" style="color:var(--teal);">Child Safety Standards</h1>
     <div class="legal-date">Last updated: June 2026</div>
     ${[
       ['Our Commitment','KingdomShift.Live has zero tolerance for child sexual abuse material (CSAM) or any content that exploits or harms minors.'],
-      ['Reporting','All CSAM violations are reported immediately to NCMEC and relevant regional authorities.'],
-      ['In-App Reporting','Users can report child safety concerns through our anonymous reporting system in Safe Stream.'],
-      ['Contact','support@kingdomshift.live'],
-    ].map(([h,t])=>`<div style="margin-bottom:18px;"><div class="legal-h2" style="color:var(--teal);">${h}</div><p class="legal-p">${t}</p></div>`).join('')}
+      ['Reporting','Child safety reports are reviewed and escalated to the appropriate authorities.'],
+      ['In-App Reporting','Users can report child safety concerns through our account-linked reporting system in Safe Stream.'],
+      ['Contact','kingdomshiftmedia@gmail.com'],
+    ].map(([h,t])=>`<div style="margin-bottom:18px;"><h2 class="legal-h2" style="color:var(--teal);">${h}</h2><p class="legal-p">${t}</p></div>`).join('')}
   </div>`;}
 
-function renderLiveGuide(p){p.innerHTML=`
-  <div class="back-bar"><button class="back-btn" onclick="navigate('live')">‹</button><div style="font-family:'Playfair Display',serif;font-size:16px;font-weight:700;">Live Streaming Setup</div></div>
-  <div style="padding:14px;">
-    <div class="sec-title" style="margin-bottom:9px;">📱 STREAM FROM YOUR PHONE</div>
-    ${[
-      ['1','Download Streamlabs or Larix','Both are free from your app store.'],
-      ['2','Get Your Stream Key','Creator Dashboard → Live Settings → Copy your RTMP stream key.'],
-      ['3','Configure the App','Settings → Connections → Add New → Protocol: RTMP','rtmp://live.kingdomshift.live/stream'],
-      ['4','Paste Your Stream Key','In the Stream Key field paste your key from the dashboard.'],
-      ['5','Go Live','Tap Start. Your stream appears on KingdomShift.Live within 10 seconds.'],
-    ].map(([n,t,d,code])=>`
-    <div class="guide-step">
-      <div class="gs-num">${n}</div>
-      <div style="flex:1;"><div class="gs-title">${t}</div><div class="gs-desc">${d}</div>${code?`<div class="gs-code">${code}</div>`:''}</div>
-    </div>`).join('')}
-    <div class="sec-title" style="margin:18px 0 9px;">💻 STREAM FROM YOUR COMPUTER</div>
-    ${[
-      ['1','Download OBS Studio','Free from obsproject.com.'],
-      ['2','Configure Stream','Settings → Stream → Service: Custom → Server: RTMP URL','rtmp://live.kingdomshift.live/stream'],
-      ['3','Paste Stream Key','From your KingdomShift.Live Creator Dashboard.'],
-      ['4','Start Streaming','Click Start Streaming. Live within seconds.'],
-    ].map(([n,t,d,code])=>`
-    <div class="guide-step">
-      <div class="gs-num">${n}</div>
-      <div style="flex:1;"><div class="gs-title">${t}</div><div class="gs-desc">${d}</div>${code?`<div class="gs-code">${code}</div>`:''}</div>
-    </div>`).join('')}
-    <div style="height:40px;"></div>
-  </div>`;}
-
-// ═══════════════════════════════════════════════════════
-// SERVICE WORKER
-// ═══════════════════════════════════════════════════════
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+function renderLiveGuide(p) {
+  p.innerHTML = '<div class="page-hdr"><h1 class="page-title">Live Streaming</h1><p>Broadcasting is not available yet. No RTMP server or stream keys are currently provided by this website.</p><button class="btn btn-glass" onclick="navigate(&quot;live&quot;)">Back to Live</button></div>';
 }
-
-// ═══════════════════════════════════════════════════════
-// BOOT
-// ═══════════════════════════════════════════════════════
-window.addEventListener('DOMContentLoaded', () => {
-  // Check URL hash for legal pages
-  const hash = window.location.hash.replace('#','');
-  const hashMap = {'privacy':'privacy_policy','terms':'terms_of_service','creator':'creator_agreement','delete':'delete_account','child-safety':'child_safety'};
-  if (hashMap[hash]) {
-    boot().then(()=>{if(S.user){navigate('settings',hashMap[hash]);}});
-  } else {
-    boot();
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {
+      // Account features still work if service workers are unavailable.
+    });
+  });
+}
+const PUBLIC_ROUTES = {privacy:'privacy_policy',terms:'terms_of_service',creator:'creator_agreement',delete:'delete_account','child-safety':'child_safety'};
+function openPublicRoute() {
+  const raw = location.hash.slice(1);
+  const sub = PUBLIC_ROUTES[raw] || (Object.values(PUBLIC_ROUTES).includes(raw) ? raw : null);
+  if (!sub) return false;
+  S.tab='settings'; S.subPage=sub;
+  document.getElementById('loading').style.display='none';
+  document.getElementById('auth-view').style.display='none';
+  document.getElementById('app-view').style.display='block';
+  updateNav(); render();
+  if (!S.user) {
+    const link=document.createElement('a'); link.href='./'; link.textContent='Return to sign in';
+    link.style.cssText='display:block;padding:16px'; document.getElementById('page').prepend(link);
+  }
+  return true;
+}
+async function start() {
+  if (openPublicRoute()) return;
+  try {
+    if (!sb) throw new Error('Account services could not load. Please refresh or contact support.');
+    await boot();
+    if (S.user) {
+      const route=location.hash.slice(1);
+      if (NAV_ITEMS.some(n=>n.id===route)) navigate(route);
+    }
+  } catch {
+    showAuth('login');
+    showAuthError('Account services are unavailable. Please refresh or contact kingdomshiftmedia@gmail.com.');
+    document.getElementById('auth-submit-btn').disabled=true;
+  }
+}
+window.addEventListener('popstate', () => {
+  if (openPublicRoute()) return;
+  if (!S.user) { showAuth('login'); return; }
+  const route=location.hash.slice(1);
+  S.tab=NAV_ITEMS.some(n=>n.id===route)?route:'feed'; S.subPage=null;
+  updateNav();render();
+});
+window.addEventListener('hashchange', () => { if (!openPublicRoute() && !S.user) showAuth('login'); });
+document.addEventListener('keydown',event=>{
+  const drawer=document.getElementById('drawer');
+  if (!drawer.classList.contains('open')) return;
+  if(event.key==='Escape') { event.preventDefault(); toggleDrawer(false); }
+  if(event.key==='Tab') {
+    const controls=[...drawer.querySelectorAll('button,a[href]')];
+    const first=controls[0],last=controls[controls.length-1];
+    if(event.shiftKey && document.activeElement===first) { event.preventDefault();last.focus(); }
+    else if(!event.shiftKey && document.activeElement===last) { event.preventDefault();first.focus(); }
   }
 });
+window.addEventListener('DOMContentLoaded', start);
 </script>
 </body>
 </html>

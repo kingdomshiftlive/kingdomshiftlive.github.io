@@ -1,15 +1,10 @@
-const CACHE = 'ks-v3';
-const ASSETS = ['/', '/index.html', '/manifest.json', '/logo.png'];
-self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
-  self.skipWaiting();
+// Retire legacy cache-first HTML. Deployments are served by the network.
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', event => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter(key => /^ks-v/.test(key)).map(key => caches.delete(key)));
+    await self.clients.claim();
+  })());
 });
-self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys =>
-    Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-  ));
-  self.clients.claim();
-});
-self.addEventListener('fetch', e => {
-  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
-});
+// Intentionally no fetch handler: never intercept API mutations or cache auth data.

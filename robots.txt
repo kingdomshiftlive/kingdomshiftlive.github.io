@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /ks_live_deploy/
+Disallow: /vendor/
+Sitemap: https://kingdomshiftlive.github.io/sitemap.xml
