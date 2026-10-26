@@ -13,13 +13,20 @@ ROOT = Path(__file__).resolve().parents[1]
 FAKE_SDK = r"""
 window.auditDb={calls:[],error:null};
 window.supabase={createClient:()=>({
- auth:{getSession:async()=>({data:{session:window.auditSession||null}}),onAuthStateChange:()=>{}},
- rpc:async()=>({data:{privacy_settings:{},notif_settings:{}},error:null}),
+ auth:{getSession:async()=>({data:{session:window.auditSession||null}}),onAuthStateChange:()=>{},signOut:async()=>({error:null}),resetPasswordForEmail:async()=>({error:null}),updateUser:async()=>({error:null})},
+ rpc:async(name,args)=>{window.auditDb.calls.push({rpc:name,args});let data=[];if(name==='get_my_settings')data={privacy_settings:{},notif_settings:{}};if(name==='set_follow')data='accepted';if(name==='save_content'||name==='request_account_deletion')data='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';if(name==='admin_overview')data={profiles:1,published:1,content:[],reports:[],deletions:[]};return {data,error:window.auditDb.error}},
+ storage:{from:()=>({createSignedUrl:async()=>({data:{signedUrl:window.auditMediaURL||'/test-media.webm'},error:null}),upload:async()=>({error:null}),remove:async()=>({error:null})})},
  from:(table)=>{
   const q={};let single=false;let inserting=false;
-  for(const method of ['select','eq','order','limit','or','single','maybeSingle','insert','update'])
+  for(const method of ['select','eq','is','in','order','limit','or','single','maybeSingle','insert','update'])
    q[method]=(...args)=>{if(method==='single'||method==='maybeSingle')single=true;if(method==='insert')inserting=true;window.auditDb.calls.push({table,method,args});return q};
-  q.then=(resolve,reject)=>Promise.resolve({data:table==='profiles'?(single?(window.auditMissingProfile&&!inserting?null:{id:'test',username:'test',display_name:'Test'}):[{id:'test',username:'test',display_name:window.auditName||'Test'}]):(single?null:[]),error:window.auditDb.error}).then(resolve,reject);
+  q.then=(resolve,reject)=>{
+   let data=window.auditFixtures?.[table]||[];
+   if(table==='videos'&&!window.auditFixtures?.videos)data=[{id:'550e8400-e29b-41d4-a716-446655440000',creator_id:'22222222-2222-4222-8222-222222222222',title:'A teaching',description:'Encouragement',likes:2,status:'published',profiles:{username:'alice',display_name:'Alice'}}];
+   if(table==='profiles')data=single?(window.auditMissingProfile&&!inserting?null:{id:window.auditSession?.user.id||'22222222-2222-4222-8222-222222222222',username:'test',display_name:'Test',role:'creator'}):[{id:'22222222-2222-4222-8222-222222222222',username:'test',display_name:window.auditName||'Test'}];
+   if(single&&table!=='profiles')data=null;
+   return Promise.resolve({data,error:window.auditDb.error}).then(resolve,reject);
+  };
   return q;
  }
 })};
@@ -48,6 +55,7 @@ class SiteTests(unittest.IsolatedAsyncioTestCase):
         self.browser = await self.pw.chromium.launch(**({'executable_path':executable} if executable else {}), args=['--no-sandbox'])
         self.context = await self.browser.new_context(service_workers='block')
         self.page = await self.context.new_page()
+        self.page.set_default_timeout(5000)
         self.errors = []
         self.page.on('pageerror', lambda e:self.errors.append(str(e)))
         self.external = []
@@ -137,15 +145,14 @@ class SiteTests(unittest.IsolatedAsyncioTestCase):
         await self.open()
         await self.sign_in_locally()
         attack="O'Brien \" <img src=x onerror=window.auditXss=true>"
-        await self.page.evaluate("""(attack)=>{S.posts=[{id:'550e8400-e29b-41d4-a716-446655440000',profiles:{display_name:attack,username:attack,avatar:attack},description:attack,likes:2}];navigate('feed')}""",attack)
+        await self.page.evaluate("""(attack)=>{S.postsLoaded=true;S.posts=[{id:'550e8400-e29b-41d4-a716-446655440000',creator_id:'22222222-2222-4222-8222-222222222222',title:attack,profiles:{display_name:attack,username:attack,avatar:attack},description:attack,likes:2}];navigate('feed')}""",attack)
         self.assertEqual(await self.page.locator('#page img').count(),0)
-        self.assertEqual(await self.page.locator('.fp-name').inner_text(),attack)
-        await self.page.locator('.fp-follow').click()
-        self.assertTrue(await self.page.evaluate("S.following['550e8400-e29b-41d4-a716-446655440000']"))
-        await self.page.locator('.fp-act').first.click()
-        self.assertEqual(await self.page.locator('[id^=lk]').inner_text(),'3')
-        await self.page.locator('.fp-save').click()
-        await self.page.locator('.story').first.click()
+        self.assertEqual(await self.page.locator('.fp-header .text-button').first.inner_text(),attack)
+        await self.page.locator('[id^=follow-]').click()
+        self.assertTrue(await self.page.evaluate("S.followStatus['22222222-2222-4222-8222-222222222222']==='accepted'"))
+        await self.page.locator('[id^=like-]').click()
+        self.assertEqual(await self.page.locator('[id^=like-]').inner_text(),'❤️ 3')
+        await self.page.locator('[id^=save-]').click()
         await self.page.evaluate("""(attack)=>{S.profile={display_name:attack,username:attack,bio:attack,avatar:attack,email:attack};navigate('profile')}""",attack)
         self.assertEqual(await self.page.locator('#page img').count(),0)
         await self.page.evaluate("""(attack)=>{S.shopItems=[{id:'test',name:attack,icon:attack,price:10,profiles:{display_name:attack}}];navigate('shop')}""",attack)
@@ -161,14 +168,16 @@ class SiteTests(unittest.IsolatedAsyncioTestCase):
     async def test_payments_never_grant_value_and_deletion_is_an_email(self):
         await self.open()
         await self.sign_in_locally()
-        before=await self.page.evaluate('window.auditDb.calls.length')
+        before=await self.page.evaluate('window.auditDb.calls.filter(c=>!c.rpc).length')
         await self.page.evaluate("S.coins=7;S.isPro=false;purchaseCoins();upgradeCreatorPro();requestWithdrawal();startGoLive();joinStream();")
         self.assertEqual(await self.page.evaluate('S.coins'),7)
         self.assertFalse(await self.page.evaluate('S.isPro'))
-        self.assertEqual(await self.page.evaluate('window.auditDb.calls.length'),before)
+        self.assertEqual(await self.page.evaluate('window.auditDb.calls.filter(c=>!c.rpc).length'),before)
         await self.page.evaluate("navigate('settings','delete_account')")
-        link=self.page.get_by_role('link',name='Open Email to Request Deletion')
-        self.assertTrue((await link.get_attribute('href')).startswith('mailto:kingdomshiftmedia@gmail.com?subject='))
+        self.assertTrue(await self.page.get_by_role('button',name='Request account deletion',exact=True).is_visible())
+        await self.page.locator('#confirm-deletion').check()
+        await self.page.get_by_role('button',name='Request account deletion',exact=True).click()
+        self.assertIn('Deletion request recorded',await self.page.locator('#auth-error').inner_text())
         self.assertEqual(self.errors,[])
 
     async def test_report_failure_does_not_claim_success(self):
@@ -186,6 +195,32 @@ class SiteTests(unittest.IsolatedAsyncioTestCase):
         records=await self.page.evaluate("window.auditDb.calls.filter(c=>c.table==='reports'&&c.method==='insert')")
         self.assertIsNone(records[-1]['args'][0]['reported_id'])
         self.assertEqual(records[-1]['args'][0]['content_url'],'https://example.test/post')
+        self.assertEqual(self.errors,[])
+
+    async def test_creator_comments_messages_and_admin_forms(self):
+        await self.open()
+        await self.sign_in_locally()
+        await self.page.evaluate("navigate('studio')")
+        await self.page.locator('#content-title').fill('A new teaching')
+        await self.page.locator('#content-description').fill('An encouraging message for our community.')
+        await self.page.get_by_role('button',name='Submit for review',exact=True).click()
+        await self.page.wait_for_function("window.auditDb.calls.some(c=>c.rpc==='save_content')")
+        saved=await self.page.evaluate("window.auditDb.calls.find(c=>c.rpc==='save_content').args")
+        self.assertEqual(saved['title'],'A new teaching')
+        self.assertIsNone(saved['media_path'])
+        await self.page.evaluate("navigate('feed')")
+        await self.page.get_by_role('button',name='Comments',exact=True).first.click()
+        await self.page.locator('#comment-body').fill('Thank you for sharing.')
+        await self.page.get_by_role('button',name='Post comment',exact=True).click()
+        await self.page.wait_for_function("window.auditDb.calls.some(c=>c.rpc==='add_comment')")
+        await self.page.get_by_role('button',name='Close dialog',exact=True).click()
+        await self.page.evaluate("navigate('messages')")
+        await self.page.locator('#message-recipient').fill('test')
+        await self.page.locator('#message-body').fill('Hello from a synthetic test.')
+        await self.page.get_by_role('button',name='Send message',exact=True).click()
+        await self.page.wait_for_function("window.auditDb.calls.some(c=>c.rpc==='send_message')")
+        await self.page.evaluate("S.profile.role='admin';navigate('admin')")
+        self.assertTrue(await self.page.get_by_role('heading',name='Account moderation',exact=True).is_visible())
         self.assertEqual(self.errors,[])
 
     async def test_service_worker_removes_only_legacy_caches(self):
@@ -220,7 +255,7 @@ class SiteTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(await self.page.locator('#menu-btn').get_attribute('aria-expanded'),'true')
             self.assertEqual(await self.page.evaluate('document.activeElement.textContent'),'Close menu')
             await self.page.keyboard.press('Shift+Tab')
-            self.assertEqual(''.join((await self.page.evaluate('document.activeElement.textContent')).split()),'⚙️Settings')
+            self.assertEqual(''.join((await self.page.evaluate('document.activeElement.textContent')).split()),'🔔Notifications')
             await self.page.keyboard.press('Escape')
             self.assertEqual(await self.page.evaluate('document.activeElement.id'),'menu-btn')
             for tab in ['feed','shop','wealth','safe','profile','settings','battles']:
