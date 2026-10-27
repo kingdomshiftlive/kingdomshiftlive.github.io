@@ -52,7 +52,7 @@ The backend `/health` route must report schema version readiness and the intende
 
 Do not proceed until the owner explicitly approves production migration, deployment, and live billing as separate actions.
 
-Inspect the **actual existing Pages publishing source** first. If it currently publishes `main`/root, merging this PR may itself publish the unbuilt source. Keep the PR unmerged until the owner approves the publishing-source transition to GitHub Actions and the configured artifact. Adding a manual workflow does not disable a pre-existing branch-based Pages deployment. Existing Pages settings could not be inspected through the blocked GitHub API.
+Inspect the **actual existing Pages publishing source** first. If it currently publishes `main`/root, merging this PR may itself publish the unbuilt source. Keep the PR unmerged until the owner approves the publishing-source transition to GitHub Actions and the configured artifact. Adding a manual workflow does not disable a pre-existing branch-based Pages deployment. Read-only verification on October 26, 2026 (Hawaii) confirmed `build_type=legacy`, source `main` `/`, HTTPS enforced, and no custom domain. The `github-pages` environment has a branch-policy rule but no required-reviewer rule. These settings were not changed. See `STAGING_VERIFICATION.md`.
 
 - Verify backups/restore procedure, rollback artifact, administrator access, moderation staffing, support mailbox ownership, refund/dispute and withdrawal procedures, and privacy/retention text.
 - Reconcile all legacy coins, balances, roles, subscription flags and follower gates. Old client-writable fields cannot be assumed trustworthy.
