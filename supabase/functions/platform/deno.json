@@ -1,0 +1,12 @@
+{
+  "nodeModulesDir": "auto",
+  "imports": {
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.118.0",
+    "stripe": "npm:stripe@23.0.1"
+  },
+  "compilerOptions": {
+    "types": [
+      "npm:@types/node@24.19.2"
+    ]
+  }
+}

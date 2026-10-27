@@ -1,13 +1,16 @@
 name: Site checks
 on:
   push:
-    branches: [main]
+    branches: [main, 'feat/**']
   pull_request:
+  workflow_call:
 permissions:
   contents: read
 jobs:
   regression:
     runs-on: ubuntu-latest
+    env:
+      DENO_DIR: ${{ github.workspace }}/.deno-cache
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -18,7 +21,16 @@ jobs:
         with:
           python-version: '3.11'
       - run: npm ci --ignore-scripts
+      - run: npm run check
+      - run: npm run typecheck
+      - run: npm run lint
       - run: npm test
+      - run: npm audit --audit-level=moderate
+      - run: npm run prepare:db
+      - run: npm run build
+        env:
+          PUBLIC_SUPABASE_URL: https://project.example.test
+          PUBLIC_SUPABASE_ANON_KEY: sb_publishable_unit_fixture
       - run: python -m pip install -r tests/requirements.txt
       - run: python -m playwright install --with-deps chromium
-      - run: python -m unittest discover -s tests -p 'test_*.py' -v
+      - run: npm run test:browser

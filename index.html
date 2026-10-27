@@ -23,6 +23,7 @@
 
 <!-- Pinned, locally hosted Supabase SDK -->
 <script src="./vendor/supabase-2.118.0.js"></script>
+<script src="./app/config.js"></script>
 
 
 <style>
@@ -474,7 +475,7 @@ button.tb-btn, button.tb-menu, .back-btn { min-width:44px; min-height:44px; }
       <div id="auth-form"></div>
       <p class="auth-sub" style="margin-top:16px">A faith-centered community for teaching, worship, and conversation.</p>
       <p class="public-links"><a href="./privacy.html">Privacy</a> · <a href="#terms">Terms</a> · <a href="./child-safety.html">Child safety</a> · <a href="./delete-account.html">Account deletion</a></p>
-      <div class="auth-promise">✓ Free to join &nbsp;·&nbsp; ✓ Your data is never sold &nbsp;·&nbsp; Payments and streaming are not yet available</div>
+      <div class="auth-promise">✓ Free to join &nbsp;·&nbsp; ✓ Your data is never sold &nbsp;·&nbsp; Stream With Purpose. Shift the World.</div>
     </div>
   </div>
 </div>
@@ -539,20 +540,20 @@ button.tb-btn, button.tb-menu, .back-btn { min-width:44px; min-height:44px; }
 // ═══════════════════════════════════════════════════════
 // PUBLIC CLIENT CONFIGURATION
 // ═══════════════════════════════════════════════════════
-const SUPABASE_URL  = 'https://zyhkginxgjxzfhtckwdy.supabase.co';
-const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5aGtnaW54Z2p4emZodGNrd2R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3Njk0ODQsImV4cCI6MjA5NTM0NTQ4NH0.yGDlb9yJUWDAHcrwWdc_WaWYFnoyBELedLZ5ZpuR_Ik';
+const SUPABASE_URL = window.KINGDOMSHIFT_CONFIG?.supabaseURL || '';
+const SUPABASE_KEY = window.KINGDOMSHIFT_CONFIG?.supabaseAnonKey || '';
 
 // ═══════════════════════════════════════════════════════
 // INIT SUPABASE
 // ═══════════════════════════════════════════════════════
-const sb = window.supabase?.createClient(SUPABASE_URL, SUPABASE_KEY);
+const sb = SUPABASE_URL && SUPABASE_KEY ? window.supabase?.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
 function escapeHTML(value) {
   return String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 // Encode both the JavaScript string and the containing HTML attribute.
 function jsArg(value) { return escapeHTML(JSON.stringify(String(value ?? ''))); }
 function count(value) { return Math.max(0, Number(value) || 0); }
-const PROFILE_FIELDS = 'id,username,display_name,bio,avatar,avatar_url,banner_url,followers,following,videos,coins,verified,is_pro,is_church_pro,tier,role,strikes,suspended,battle_score,joined_at,updated_at';
+const PROFILE_FIELDS = 'id,username,display_name,bio,avatar,avatar_url,banner_url,followers,following,videos,verified,tier,battle_score,joined_at,updated_at';
 
 // ═══════════════════════════════════════════════════════
 // STATE
@@ -709,7 +710,7 @@ async function loadProfile() {
 }
 
 async function createProfile() {
-  const base = (S.user.user_metadata?.username || S.user.email.split('@')[0]).replace(/[^a-z0-9_]/gi,'').toLowerCase();
+  const base = (S.user.user_metadata?.username || 'creator').replace(/[^a-z0-9_]/gi,'').toLowerCase();
   const username = `${base.slice(0,24)}_${S.user.id.slice(0,8)}`;
   const { data, error } = await sb.from('profiles').insert({
     id: S.user.id,
@@ -1141,11 +1142,11 @@ function renderWealth(p) {
       ].map(e=>`<div class="earn-item"><div class="ei-icon">${e.icon}</div><div><div class="ei-name">${e.name}</div><div class="ei-note">${e.note}</div></div><div class="ei-amount">${e.amount}</div></div>`).join('')}
     </div>
     <div style="padding:0 14px 20px;">
-      ${!locked&&balance>=50?`
+      ${!locked&&followers>=5000&&balance>=50?`
       <button class="btn btn-teal btn-full" onclick="requestWithdrawal()" style="margin-bottom:8px;">💸 Request Withdrawal</button>`:''}
       <div style="font-size:11px;color:var(--dim);text-align:center;line-height:1.6;">
-        Withdrawals are not available yet. Contact support about existing balances.<br/>
-        <span style="color:var(--teal);">No payout requests are accepted through this website yet.</span>
+        Withdrawals require eligibility and operator review. Requests reserve your available balance.<br/>
+        <span style="color:var(--teal);">Contact support for payout scheduling and status.</span>
       </div>
     </div>`;
   });
@@ -1714,5 +1715,6 @@ document.addEventListener('keydown',event=>{
 window.addEventListener('DOMContentLoaded', start);
 </script>
 <script src="./app/customer.js"></script>
+<script src="./app/services.js"></script>
 </body>
 </html>

@@ -1,0 +1,4 @@
+project_id = "kingdomshiftlive"
+[functions.platform]
+# Stripe needs a public webhook. Every customer endpoint validates its JWT itself.
+verify_jwt = false

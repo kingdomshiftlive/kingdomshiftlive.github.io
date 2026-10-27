@@ -29,3 +29,8 @@ test('manifest icons have real PNG encoding and matching dimensions', async () =
     assert.equal(`${bytes.readUInt32BE(16)}x${bytes.readUInt32BE(20)}`,icon.sizes);
   }
 });
+
+test('streaming bundle and its relative image asset match the locked official package', async () => {
+  assert.deepEqual(await read('vendor/zego-uikit-2.18.5.js'),await read('node_modules/@zegocloud/zego-uikit-prebuilt/zego-uikit-prebuilt.js'));
+  assert.deepEqual(await read('vendor/4f79f8247d3206183fd2.svg'),await read('node_modules/@zegocloud/zego-uikit-prebuilt/4f79f8247d3206183fd2.svg'));
+});

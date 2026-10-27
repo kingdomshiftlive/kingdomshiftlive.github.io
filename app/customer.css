@@ -7,3 +7,4 @@
 form .label{margin-top:16px}form .input{margin-bottom:12px}form textarea{min-height:120px;resize:vertical}form button[type=submit]{margin-top:12px}.consent{display:flex;align-items:flex-start;gap:10px;line-height:1.6;margin:16px 0;font-size:13px}.consent input{min-width:22px;min-height:22px;margin-top:2px}.comment-list{max-height:40dvh;overflow-y:auto}.comment-list p{padding:12px;border-bottom:1px solid var(--border);white-space:pre-wrap}
 .fp-actions{gap:6px;flex-wrap:wrap}.fp-header{flex-wrap:wrap}.page-hdr p{line-height:1.7;margin:10px 0}.page{overflow-wrap:anywhere}#form-status{margin:12px 0;white-space:pre-wrap}
 @media(max-width:600px){#customer-dialog{padding:18px}.action-row>*{flex:1}.fp-actions .btn{padding:10px}.content-card{padding:14px}.page-title{font-size:22px}}
+.zego-container{width:100%;height:min(72dvh,800px);min-height:360px}.shop-card p{line-height:1.6;margin:10px 0}.sc-body{overflow-wrap:anywhere}video:focus-visible{outline:3px solid var(--gold)}

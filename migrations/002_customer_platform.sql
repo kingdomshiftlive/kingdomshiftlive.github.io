@@ -48,9 +48,10 @@ CREATE OR REPLACE FUNCTION public.can_view_creator(creator text) RETURNS boolean
   (p.id=(SELECT auth.uid())::text OR coalesce(p.privacy_settings->>'privateAccount','false')<>'true'
   OR EXISTS(SELECT 1 FROM public.follows f WHERE f.following_id=creator AND f.follower_id=(SELECT auth.uid())::text AND f.status='accepted')));
 $$;
-CREATE OR REPLACE FUNCTION public.notify_user(recipient text,message text) RETURNS void LANGUAGE sql SECURITY DEFINER SET search_path='' AS $$
- INSERT INTO public.notifications(user_id,body) SELECT recipient,left(message,300) WHERE EXISTS(SELECT 1 FROM public.profiles WHERE id=recipient AND NOT suspended);
+CREATE OR REPLACE FUNCTION public.notify_user_event(recipient text,message text,event_type text) RETURNS void LANGUAGE sql SECURITY DEFINER SET search_path='' AS $$
+ INSERT INTO public.notifications(user_id,body) SELECT recipient,left(message,300) WHERE EXISTS(SELECT 1 FROM public.profiles WHERE id=recipient AND NOT suspended AND coalesce(notif_settings->>event_type,'true')<>'false');
 $$;
+CREATE OR REPLACE FUNCTION public.notify_user(recipient text,message text) RETURNS void LANGUAGE sql SECURITY DEFINER SET search_path='' AS $$ SELECT public.notify_user_event(recipient,message,'systemAlerts'); $$;
 -- Discoverable public identities; private content still requires accepted follow access.
 DROP POLICY IF EXISTS "Visible profiles" ON public.profiles;
 CREATE POLICY "Visible profiles" ON public.profiles FOR SELECT USING (id=(SELECT auth.uid())::text OR NOT suspended);
@@ -104,8 +105,8 @@ BEGIN
  IF following THEN
   SELECT CASE WHEN is_private THEN 'pending' ELSE 'accepted' END INTO result FROM public.profiles WHERE id=creator;
   INSERT INTO public.follows(follower_id,following_id,status) VALUES(actor,creator,result) ON CONFLICT DO NOTHING;
+  IF FOUND THEN PERFORM public.notify_user_event(creator,CASE WHEN result='pending' THEN 'New follow request. Review it in Privacy settings.' ELSE 'You have a new follower.' END,'newFollower'); END IF;
   SELECT status INTO result FROM public.follows WHERE follower_id=actor AND following_id=creator;
-  PERFORM public.notify_user(creator,CASE WHEN result='pending' THEN 'New follow request. Review it in Privacy settings.' ELSE 'You have a new follower.' END);
  ELSE DELETE FROM public.follows WHERE follower_id=actor AND following_id=creator; result := 'none'; END IF;
  UPDATE public.profiles SET followers=(SELECT count(*) FROM public.follows WHERE following_id=creator AND status='accepted') WHERE id=creator;
  UPDATE public.profiles SET following=(SELECT count(*) FROM public.follows WHERE follower_id=actor AND status='accepted') WHERE id=actor;
@@ -132,7 +133,7 @@ BEGIN
  SELECT creator_id INTO creator FROM public.videos WHERE id=video AND status='published' AND public.can_view_creator(creator_id);
  IF creator IS NULL OR EXISTS(SELECT 1 FROM public.user_blocks WHERE (user_id=creator AND blocked_id=actor) OR (user_id=actor AND blocked_id=creator)) THEN RAISE EXCEPTION 'Comments unavailable'; END IF;
  INSERT INTO public.comments(video_id,user_id,body) VALUES(video,actor,btrim(comment)) RETURNING id INTO result;
- IF creator<>actor THEN PERFORM public.notify_user(creator,'New comment on your content.'); END IF; RETURN result;
+ IF creator<>actor THEN PERFORM public.notify_user_event(creator,'New comment on your content.','comments'); END IF; RETURN result;
 END $$;
 CREATE OR REPLACE FUNCTION public.send_message(recipient text,message text) RETURNS uuid LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE actor text := public.require_member(); result uuid;
@@ -142,7 +143,7 @@ BEGIN
  OR NOT EXISTS(SELECT 1 FROM public.profiles WHERE id=recipient AND NOT suspended AND coalesce(privacy_settings->>'allowMessages','true')<>'false')
  OR EXISTS(SELECT 1 FROM public.user_blocks WHERE (user_id=recipient AND blocked_id=actor) OR (user_id=actor AND blocked_id=recipient)) THEN RAISE EXCEPTION 'Message cannot be sent'; END IF;
  INSERT INTO public.direct_messages(sender_id,recipient_id,body) VALUES(actor,recipient,btrim(message)) RETURNING id INTO result;
- PERFORM public.notify_user(recipient,'You have a new message.'); RETURN result;
+ PERFORM public.notify_user_event(recipient,'You have a new message.','messages'); RETURN result;
 END $$;
 CREATE OR REPLACE FUNCTION public.set_user_block(target text,blocked boolean) RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path='' AS $$
 DECLARE actor text := public.require_member();
@@ -211,7 +212,7 @@ CREATE OR REPLACE FUNCTION public.can_view_media(path text) RETURNS boolean LANG
  SELECT EXISTS(SELECT 1 FROM public.videos WHERE file_path=path AND ((status='published' AND public.can_view_creator(creator_id)) OR creator_id=(SELECT auth.uid())::text)) OR EXISTS(SELECT 1 FROM public.profiles WHERE id=(SELECT auth.uid())::text AND role='admin' AND NOT suspended);
 $$;
 -- New functions are deny-by-default; expose only bounded authenticated actions.
-REVOKE ALL ON FUNCTION public.require_member(),public.require_admin(),public.enforce_rate_limit(text,text,integer),public.notify_user(text,text) FROM PUBLIC,anon,authenticated;
+REVOKE ALL ON FUNCTION public.require_member(),public.require_admin(),public.enforce_rate_limit(text,text,integer),public.notify_user(text,text),public.notify_user_event(text,text,text) FROM PUBLIC,anon,authenticated;
 DO $$ DECLARE signature text; BEGIN
  FOREACH signature IN ARRAY ARRAY['set_video_like(uuid,boolean)','set_video_saved(uuid,boolean)','set_follow(text,boolean)','review_follow(text,boolean)','get_follow_requests()','add_comment(uuid,text)','send_message(text,text)','set_user_block(text,boolean)','save_content(uuid,text,text,text,text)','remove_content(uuid)','request_account_deletion()','admin_overview()','moderate_content(uuid,text,text)','resolve_report(uuid,text,text)','suspend_member(text,boolean,text)','can_view_media(text)'] LOOP
  EXECUTE 'REVOKE ALL ON FUNCTION public.'||signature||' FROM PUBLIC,anon,authenticated';

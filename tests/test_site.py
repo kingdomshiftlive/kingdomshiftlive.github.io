@@ -14,11 +14,12 @@ FAKE_SDK = r"""
 window.auditDb={calls:[],error:null};
 window.supabase={createClient:()=>({
  auth:{getSession:async()=>({data:{session:window.auditSession||null}}),onAuthStateChange:()=>{},signOut:async()=>({error:null}),resetPasswordForEmail:async()=>({error:null}),updateUser:async()=>({error:null})},
- rpc:async(name,args)=>{window.auditDb.calls.push({rpc:name,args});let data=[];if(name==='get_my_settings')data={privacy_settings:{},notif_settings:{}};if(name==='set_follow')data='accepted';if(name==='save_content'||name==='request_account_deletion')data='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';if(name==='admin_overview')data={profiles:1,published:1,content:[],reports:[],deletions:[]};return {data,error:window.auditDb.error}},
+ rpc:async(name,args)=>{window.auditDb.calls.push({rpc:name,args});let data=[];if(name==='get_my_account')data={role:'creator',coins:0,is_pro:false,suspended:false};if(name==='get_my_settings')data={privacy_settings:{},notif_settings:{}};if(name==='set_follow')data='accepted';if(name==='save_content'||name==='request_account_deletion')data='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';if(name==='admin_operations')data={incidents:[],withdrawals:[],deletions:[]};if(name==='admin_overview')data={profiles:1,published:1,content:[],reports:[],deletions:[]};return {data,error:window.auditDb.error}},
+ functions:{invoke:async(name,options)=>{window.auditDb.calls.push({api:name,args:options});let data={};if(name.endsWith('/health'))data=window.auditCapabilities||{ready:false,billing:'disabled',streaming:false,pro:false};if(name==='platform/streams')data={stream_id:'ks_aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'};if(name.endsWith('/token'))data={app_id:1234,token:'04unit_fixture',room_id:'ks_aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',user_id:'11111111-1111-4111-8111-111111111111',host:!!window.auditHost,expires_in:600};return {data,error:null}}},
  storage:{from:()=>({createSignedUrl:async()=>({data:{signedUrl:window.auditMediaURL||'/test-media.webm'},error:null}),upload:async()=>({error:null}),remove:async()=>({error:null})})},
  from:(table)=>{
   const q={};let single=false;let inserting=false;
-  for(const method of ['select','eq','is','in','order','limit','or','single','maybeSingle','insert','update'])
+  for(const method of ['select','eq','is','in','gt','order','limit','or','single','maybeSingle','insert','update'])
    q[method]=(...args)=>{if(method==='single'||method==='maybeSingle')single=true;if(method==='insert')inserting=true;window.auditDb.calls.push({table,method,args});return q};
   q.then=(resolve,reject)=>{
    let data=window.auditFixtures?.[table]||[];
@@ -54,6 +55,7 @@ class SiteTests(unittest.IsolatedAsyncioTestCase):
         executable = os.environ.get('CHROMIUM_PATH')
         self.browser = await self.pw.chromium.launch(**({'executable_path':executable} if executable else {}), args=['--no-sandbox'])
         self.context = await self.browser.new_context(service_workers='block')
+        await self.context.add_init_script("window.KINGDOMSHIFT_CONFIG={supabaseURL:'https://project.example.test',supabaseAnonKey:'sb_publishable_unit_fixture'}")
         self.page = await self.context.new_page()
         self.page.set_default_timeout(5000)
         self.errors = []
@@ -155,9 +157,9 @@ class SiteTests(unittest.IsolatedAsyncioTestCase):
         await self.page.locator('[id^=save-]').click()
         await self.page.evaluate("""(attack)=>{S.profile={display_name:attack,username:attack,bio:attack,avatar:attack,email:attack};navigate('profile')}""",attack)
         self.assertEqual(await self.page.locator('#page img').count(),0)
-        await self.page.evaluate("""(attack)=>{S.shopItems=[{id:'test',name:attack,icon:attack,price:10,profiles:{display_name:attack}}];navigate('shop')}""",attack)
+        await self.page.evaluate("""(attack)=>{window.auditFixtures={shop_items:[{id:'550e8400-e29b-41d4-a716-446655440000',name:attack,icon:attack,price:10,profiles:{display_name:attack}}]};navigate('shop')}""",attack)
         self.assertEqual(await self.page.locator('#page img').count(),0)
-        await self.page.locator('.sc-add').click()
+        self.assertTrue(await self.page.get_by_role('button',name='Purchase',exact=True).is_disabled())
         await self.page.evaluate('(attack)=>{window.auditName=attack;navigate("search")}',attack)
         await self.page.locator('#search-input').fill('test')
         await self.page.wait_for_function("document.getElementById('search-results').textContent.includes('O\\'Brien')")
@@ -192,9 +194,9 @@ class SiteTests(unittest.IsolatedAsyncioTestCase):
         await self.page.evaluate('window.auditDb.error=null')
         await self.page.get_by_role('button',name='Submit Report',exact=True).click()
         self.assertEqual(await self.page.locator('#report-status').inner_text(),'Report received for review.')
-        records=await self.page.evaluate("window.auditDb.calls.filter(c=>c.table==='reports'&&c.method==='insert')")
-        self.assertIsNone(records[-1]['args'][0]['reported_id'])
-        self.assertEqual(records[-1]['args'][0]['content_url'],'https://example.test/post')
+        records=await self.page.evaluate("window.auditDb.calls.filter(c=>c.rpc==='submit_safety_report')")
+        self.assertNotIn('reporter_id',records[-1]['args'])
+        self.assertEqual(records[-1]['args']['content_url'],'https://example.test/post')
         self.assertEqual(self.errors,[])
 
     async def test_creator_comments_messages_and_admin_forms(self):
@@ -223,9 +225,69 @@ class SiteTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(await self.page.get_by_role('heading',name='Account moderation',exact=True).is_visible())
         self.assertEqual(self.errors,[])
 
+    async def test_coin_package_keyboard_and_disabled_billing(self):
+        await self.context.add_init_script("window.auditCapabilities={ready:true,billing:'test',pro:true,streaming:false}")
+        await self.open()
+        await self.sign_in_locally()
+        await self.page.wait_for_function("S.capabilities?.billing==='test'")
+        await self.page.evaluate('S.coins=40;showCoinsModal()')
+        package=self.page.get_by_role('button',name='550 coins $4.99',exact=True)
+        await package.focus()
+        await self.page.keyboard.press('Enter')
+        self.assertEqual(await package.get_attribute('aria-pressed'),'true')
+        self.assertEqual(await self.page.locator('#buy-btn').text_content(),'Buy 550 coins for $4.99')
+        await self.page.evaluate("S.capabilities.billing='disabled';purchaseCoins()")
+        self.assertEqual(await self.page.evaluate('S.coins'),40)
+        self.assertFalse(await self.page.evaluate("window.auditDb.calls.some(c=>c.api==='platform/checkout')"))
+        self.assertEqual(self.errors,[])
+
+    async def test_stream_uses_production_token_and_cleans_up_on_leave(self):
+        await self.context.add_init_script("""
+          window.auditCapabilities={ready:true,billing:'disabled',pro:false,streaming:true};
+          window.auditFixtures={live_streams:[{id:'ks_aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',title:'Synthetic broadcast',creator_id:'22222222-2222-4222-8222-222222222222',profiles:{display_name:'Test creator'}}]};
+          window.auditTokens=[];window.auditDestroyed=0;
+          window.ZegoUIKitPrebuilt={LiveStreaming:1,Host:1,Audience:2,
+            generateKitTokenForProduction:(...args)=>{window.auditTokens.push(args);return 'kit_unit_fixture'},
+            create:()=>({joinRoom:options=>{window.auditRoom=options;options.container.textContent='Synthetic streaming session';options.onJoinRoom()},renewToken:()=>true,destroy:()=>{window.auditDestroyed++}})};
+        """)
+        await self.open()
+        await self.sign_in_locally()
+        await self.page.wait_for_function('S.capabilities?.streaming===true')
+        await self.page.evaluate("navigate('live')")
+        await self.page.get_by_role('button',name='Join broadcast',exact=True).click()
+        await self.page.wait_for_function("document.getElementById('zego-container')?.textContent==='Synthetic streaming session'")
+        self.assertEqual(await self.page.evaluate('window.auditTokens[0][1]'),'04unit_fixture')
+        self.assertEqual(await self.page.evaluate('window.auditRoom.scenario.config.role'),2)
+        self.assertFalse(await self.page.evaluate('window.auditRoom.turnOnCameraWhenJoining'))
+        await self.page.get_by_role('button',name='Leave broadcast',exact=True).click()
+        self.assertEqual(await self.page.evaluate('window.auditDestroyed'),1)
+        self.assertEqual(self.errors,[])
+
+    async def test_native_video_plays_synthetic_media_through_signed_url_path(self):
+        await self.open()
+        await self.sign_in_locally()
+        await self.page.evaluate("""async()=>{
+          const canvas=document.createElement('canvas');canvas.width=160;canvas.height=90;
+          const context=canvas.getContext('2d');context.fillStyle='teal';context.fillRect(0,0,160,90);
+          const stream=canvas.captureStream(10),chunks=[];
+          const recorder=new MediaRecorder(stream,{mimeType:'video/webm'});
+          const finished=new Promise(resolve=>recorder.onstop=resolve);
+          recorder.ondataavailable=event=>chunks.push(event.data);recorder.start();
+          await new Promise(resolve=>setTimeout(resolve,150));context.fillStyle='gold';context.fillRect(20,20,40,40);
+          await new Promise(resolve=>setTimeout(resolve,200));recorder.stop();await finished;stream.getTracks().forEach(track=>track.stop());
+          window.auditMediaURL=URL.createObjectURL(new Blob(chunks,{type:'video/webm'}));
+          S.postsLoaded=true;S.posts=[{id:'550e8400-e29b-41d4-a716-446655440000',creator_id:'22222222-2222-4222-8222-222222222222',title:'Synthetic media',file_path:'test/synthetic.webm',profiles:{display_name:'Test creator'}}];navigate('feed');
+        }""")
+        await self.page.wait_for_function("document.querySelector('video')?.src.startsWith('blob:')")
+        await self.page.evaluate("document.querySelector('video').play()")
+        await self.page.wait_for_function("document.querySelector('video').currentTime>0.05")
+        await self.page.evaluate("document.querySelector('video').pause()")
+        self.assertEqual(self.errors,[])
+
     async def test_service_worker_removes_only_legacy_caches(self):
         await self.context.close()
         self.context=await self.browser.new_context(service_workers='allow')
+        await self.context.add_init_script("window.KINGDOMSHIFT_CONFIG={supabaseURL:'https://project.example.test',supabaseAnonKey:'sb_publishable_unit_fixture'}")
         self.page=await self.context.new_page()
         self.page.on('pageerror',lambda e:self.errors.append(str(e)))
         # Seed legacy state before the application's first registration. Waiting
