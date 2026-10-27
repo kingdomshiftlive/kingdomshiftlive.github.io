@@ -17,3 +17,9 @@ Run `npm run check`, `npm run typecheck`, `npm run lint`, `npm test`, `npm run t
 ## Release controls
 
 No production SQL, live charge/payout, or production deployment has been executed. Pricing is approved; live billing and production release still require final owner approval. Do not merge/deploy until staging acceptance, legacy-balance reconciliation, credential rotation and operations review are complete. The network draft is for the development environment only and does not grant production authorization.
+
+## Remaining launch work and merge protection
+
+See `docs/LAUNCH_COMPLETION.md` for the ordered owner/operator checklist and the minimal community-only release option. Existing application work and validation evidence are preserved; only four targeted release-preflight tests were added and executed in this continuation.
+
+The dispatch workflow now requires the exact reviewed main SHA, checks the actual Pages publishing source and required environment reviewer before checks, and rechecks protections after review. It fails closed on missing permissions or unknown settings. This does not disable existing legacy branch-based Pages publishing: the owner must switch Settings → Pages → Source to GitHub Actions before merging can be treated as nonpublishing. No merge, deployment, production-data change, provider-secret rotation or live billing activation was performed.

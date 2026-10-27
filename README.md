@@ -4,6 +4,9 @@ Faith-centered community platform: **Stream With Purpose. Shift the World.** The
 
 The code is prepared for owner review, **not deployed or approved for live billing**. See [launch instructions](docs/LAUNCH.md), [implementation status](docs/STATUS.md), and [approved pricing](docs/PRICING.md).
 
+For the remaining prioritized release gates and the next single owner action, see
+[Launch completion](docs/LAUNCH_COMPLETION.md). Existing implementation and test evidence are retained.
+
 ## Architecture
 
 - Static HTML/CSS/JavaScript on GitHub Pages, with pinned browser SDKs served from `vendor/`.

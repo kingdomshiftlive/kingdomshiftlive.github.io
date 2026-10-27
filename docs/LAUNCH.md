@@ -2,6 +2,8 @@
 
 **Default state: live billing off, streaming off, erasure processing off, no automatic production deployment.** Pricing approval does not change this. Every production command below requires explicit owner approval before execution.
 
+Current remaining-work priority and evidence: [LAUNCH_COMPLETION.md](LAUNCH_COMPLETION.md).
+
 ## 1. Review and stage
 
 1. Review the feature branch, migrations, customer flows, commercial settings, and retention/operations procedures. Confirm that no approved branding or guide has been replaced.
@@ -59,7 +61,7 @@ Inspect the **actual existing Pages publishing source** first. If it currently p
 - Verify the Android release package/certificate fingerprint in `.well-known/assetlinks.json`; the repository alone cannot prove its correctness.
 - For `kingdomshift.live`, verify domain ownership, DNS, Pages configuration and HTTPS before setting a CNAME or changing canonical/social/sitemap/API redirect origins. The current source uses the existing GitHub Pages host.
 - Apply reviewed production migrations/Storage policies, deploy the approved Edge function and set its secrets, then build the public artifact with the correct public project configuration.
-- Production website deployment is the manual workflow `Controlled Pages deployment`. It requires the exact confirmation text and the protected `github-pages` environment. Configure required reviewers in repository settings; workflow code alone cannot create that protection.
+- Production website deployment is the manual workflow `Controlled Pages deployment`. It requires the full reviewed main SHA as `release_sha`, the exact confirmation text and the protected `github-pages` environment. The read-only preflight rejects branch-based Pages publishing, absent required reviewers, other branches, unknown settings and mismatched SHAs; it rechecks publishing protections after environment approval. Configure required reviewers in repository settings; workflow code alone cannot create that protection.
 - Live checkout additionally requires `BILLING_MODE=live`, a matching live Stripe key/webhook, `LIVE_BILLING_APPROVED=true`, and database `payment_environment=live`. Set none of these automatically. Streaming and erasure each have their own explicit flags.
 - After release, verify the actual deployed build-info commit, root application, SDK assets, policy pages, auth redirects, capability endpoint, moderation queues and receipt processing. Any live payment smoke test requires its own explicit approval.
 

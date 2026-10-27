@@ -1,5 +1,7 @@
 # Implementation and validation status
 
+For the current remaining-blocker order, provider responsibilities, safe initial-release scope and exact owner action, see [LAUNCH_COMPLETION.md](LAUNCH_COMPLETION.md). Prior validation below is retained evidence; it has not been replayed in the launch-completion batch.
+
 Local validation: **37 Node tests and 14 browser tests passed**, with no failures or skips; see `VALIDATION.md`. This describes source code and isolated tests. It is not a production readiness certification or a claim that provider accounts have been configured.
 
 | Area | Implemented | Validation | External acceptance still required |

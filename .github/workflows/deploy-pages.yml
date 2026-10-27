@@ -2,6 +2,10 @@ name: Controlled Pages deployment
 on:
   workflow_dispatch:
     inputs:
+      release_sha:
+        description: 'Full reviewed main commit SHA; must match this workflow run'
+        required: true
+        type: string
       confirmation:
         description: 'Type I APPROVE PRODUCTION DEPLOYMENT to authorize this website release'
         required: true
@@ -14,11 +18,22 @@ concurrency:
 jobs:
   authorization:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
     steps:
-      - name: Require explicit owner confirmation
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify exact release and existing Pages protections (read-only)
         env:
+          GITHUB_TOKEN: ${{ github.token }}
+          RELEASE_SHA: ${{ inputs.release_sha }}
           CONFIRMATION: ${{ inputs.confirmation }}
-        run: test "$CONFIRMATION" = 'I APPROVE PRODUCTION DEPLOYMENT'
+        run: node scripts/release-preflight.mjs
   checks:
     needs: authorization
     uses: ./.github/workflows/checks.yml
@@ -34,10 +49,18 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
           cache: npm
+      - name: Recheck publishing controls after environment approval
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          RELEASE_SHA: ${{ inputs.release_sha }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: node scripts/release-preflight.mjs
       - run: npm ci --ignore-scripts
       - name: Build reviewed public site
         run: npm run build
