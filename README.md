@@ -1,56 +1,62 @@
-# KingdomShift.Live website
+# KingdomShift.Live
 
-This is a static GitHub Pages application. `index.html` at the repository root is the authoritative application. `ks_live_deploy/index.html` redirects old links to it; do not maintain or deploy a separate application from that directory.
+Faith-centered community platform: **Stream With Purpose. Shift the World.** The approved dark, teal, gold, and pink branding is retained. The root application is authoritative; `ks_live_deploy/` redirects old links to it.
 
-## Development and checks
+The code is prepared for owner review, **not deployed or approved for live billing**. See [launch instructions](docs/LAUNCH.md), [implementation status](docs/STATUS.md), and [approved pricing](docs/PRICING.md).
 
-Use the existing checkout. Node 24 and Python 3.11+ are used in CI. No frontend build, payment credentials, or signing secrets are needed to serve the website.
+## Architecture
+
+- Static HTML/CSS/JavaScript on GitHub Pages, with pinned browser SDKs served from `vendor/`.
+- Supabase Auth for email signup, confirmation, sign-in, recovery, password changes, and session management.
+- PostgreSQL RLS, bounded authenticated RPCs, owner-only account state, moderation queues, and private Storage buckets.
+- `supabase/functions/platform/`: authenticated Edge API for Stripe checkout/webhooks/portal, receipt-authorized downloads, Zego production tokens, stream leases, and explicitly enabled erasure processing.
+- No service-role, Stripe secret, or streaming signing key belongs in browser configuration. `app/config.js` is generated in the deployment artifact from **public** build variables.
+
+## Local development
+
+Use Node 24 and Python 3.11+. Work in the existing checkout.
 
 ```sh
 npm ci --ignore-scripts
-npm run serve
-```
-
-The development server binds to port 8000 on the local machine. It is for development only. GitHub Pages must publish the **main branch, repository root**, or an equivalent artifact containing these root files. No deployment or production database changes are performed by the test workflow.
-
-```sh
+npm run prepare:db
+npm run check
+npm run typecheck
+npm run lint
 npm test
 python -m pip install -r tests/requirements.txt
 python -m playwright install chromium
-python -m unittest discover -s tests -p 'test_*.py' -v
-npm audit --audit-level=moderate
+npm run test:browser
 ```
 
-If using an already installed Chromium, set `CHROMIUM_PATH` to its executable for the Python test command. Database tests use PGlite, an isolated PostgreSQL engine: they do not contact Supabase. Browser tests block external requests and use a fake database for authenticated operations. They cover real SDK loading, authentication startup/profile creation, navigation, legal pages, HTML injection, UUID controls, mobile layouts, keyboard navigation, report failures, payment safeguards, icons, redirects, and cache cleanup. They are not production integration tests.
+`prepare:db` only generates ordered CLI files. It does not connect to a database. Tests use synthetic fixtures, isolated PostgreSQL/PGlite databases, fake provider calls, and blocked external browser requests. Set `CHROMIUM_PATH` to an existing Chromium executable when needed.
 
-The Supabase SDK is pinned to 2.118.0 in `package-lock.json` and served locally from `vendor/`. Its official npm tarball integrity was verified before vendoring. On a deliberate dependency upgrade, install and audit the exact version, replace the UMD bundle from `node_modules/@supabase/supabase-js/dist/umd/supabase.js`, retain its license, and update the HTML reference and regression integrity test together.
+Supply `PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_ANON_KEY` from an authorized development/staging project through your shell or secure environment settings, then:
 
-## Required production remediation
+```sh
+npm run build
+python3 -m http.server 8000 --bind 127.0.0.1 --directory dist
+```
 
-The source fixes do not rotate credentials, apply SQL, or publish GitHub Pages.
+The build refuses service-role or unrelated keys and excludes backend code, migrations, tests, environment files, and dependencies from the public artifact. Source `app/config.js` deliberately has no hardcoded key. Without public configuration, account features show an error; public legal pages remain available.
 
-1. **Rotate the exposed Zego signing credentials/server secrets** in the provider dashboard. Treat the old values as compromised: they remain in Git history and previously deployed copies. They must never return to browser code. Confirm the rotation invalidates old credentials/tokens according to the provider's procedure.
-2. Back up the Supabase database and verify changes in a staging project. For an **existing installation**, run `migrations/001_security_hardening.sql` as the database owner in Supabase SQL Editor. It is transactional and repeatable. For a **new installation**, run `supabase_schema.sql`, which includes the same hardening. Do not rerun the retired legacy live-stream SQL.
-3. The migration deliberately replaces policies and client grants on the application tables. Client writes to balances, coins, follower counts, subscriptions, verification, roles, streams, gifts, scores, withdrawals, and content publishing are disabled. Display/profile preferences, safe profile creation, and detailed reports remain available. Review native clients and other services that may have depended on the old permissive grants before applying it. Trusted server services must replace those operations rather than restoring broad grants. The application requires the new `get_my_settings()` function and report fields.
-4. Deploy the reviewed website changes. Verify GitHub Pages source, HTTPS, the root application and SDK, policy pages, icons, `.well-known/assetlinks.json`, and a real authenticated account. Verify that another account cannot read email/private content or change financial/privileged fields. Test report receipt using a designated test account and inspect it through authorized administrative tooling.
-5. Confirm the Android package name and certificate fingerprints in `.well-known/assetlinks.json` match the actual signed release. Their correctness cannot be established from this website repository. The old root `assetlinks.json` remains for compatibility.
+## Database and integrations
 
-No changes have been pushed or published by these instructions. Production headers, provider settings, email delivery, Android verification, and real authenticated behavior require production access to verify.
+Canonical SQL lives in `supabase_schema.sql` and `migrations/`. `npm run prepare:db` copies these into ignored, timestamped `supabase/migrations/` files for the CLI. Existing installations already using migration 001 should apply only the outstanding changes after a reviewed baseline; never mark unexecuted SQL as applied.
 
-## Features awaiting a trusted backend
+Apply database and Storage changes to a synthetic staging project first. Follow the staged procedure in `docs/LAUNCH.md`. The test fixtures do not prove that production permissions, SMTP, Stripe products/webhooks, Zego room privileges, or existing customer records are correct.
 
-New coin/Pro purchases, gifting, withdrawals, streaming, shop checkout, playback, messaging, and persistent social interactions are explicitly unavailable or labeled as previews. Disabled financial actions never grant value, accept payment, or write to a financial table. The website previously simulated those successes; those fallbacks have been removed. Practice quiz scores and feed likes/follows/saves last only for the current visit and provide no financial rewards.
+Provider settings and required variables are listed in `.env.example`. Enter secret values only in the provider's secure settings. Supabase supplies its service-role key to deployed Edge functions. Do not paste credentials into chat, commit `.env` files, or treat a cloud proxy placeholder as a raw signing secret.
 
-To enable these features safely, implement and test authenticated server operations with server-owned product/pricing configuration, verified idempotent payment webhooks, an atomic ledger, authorization and rate limiting, approved withdrawal handling, and short-lived server-issued streaming tokens. Streaming signing credentials and Supabase service-role keys belong only in backend secret storage. GitHub Pages cannot host those backend endpoints. Do not re-enable the old client signing or demo-value code.
+## Safety controls
 
-Private accounts are currently visible **only to their owner**, including published content. There is no approved-follower system yet. Privacy preferences are read through an owner-only function; emails come from Supabase Auth and are not selectable through the public profile API. Existing stored email columns are retained to avoid destructive data changes, but client access is revoked.
+- Live billing defaults to disabled. It additionally requires an explicitly matching database environment and `LIVE_BILLING_APPROVED=true` before live checkout is possible. Production deployment is manual and requires explicit confirmation.
+- Old exposed Zego credentials must be rotated. Production tokens are generated server-side, limited in time, bound to a room/user, and restrict audience publishing.
+- Posts and digital products require administrator review. Private content requires accepted follow access; media uses expiring URLs.
+- Financial credits come from verified receipts, gifts are atomic/idempotent, and withdrawals reserve balances pending operator review. Payouts are not automatically transferred by this application.
+- Refund/dispute events put purchases into review and suspend the buyer pending financial reconciliation. Operators must resolve the incident; the code does not silently invent refund clawbacks.
+- Deletion requests are durable and deactivate access immediately. Optional erasure processing remains disabled until the owner approves retention procedures. It blocks unresolved subscriptions, orders, purchases, and balances, removes personal content/authentication, and retains pseudonymous accounting references.
+- Practice quiz results are local and have no monetary rewards. No AI assistant or approved AI-guide asset exists in the supplied repository; no AI integration or replacement guide was invented.
 
-Reports require sign-in, a content/profile URL, a concern category, and details. They are account-linked, not anonymous, and acknowledge success only after a confirmed insert. Operators must monitor the reports table through authorized tools and maintain a real moderation/escalation process. The code does not automatically notify moderators or law enforcement.
+## Dependency updates
 
-Account deletion uses a clearly labeled email link to the existing published support address, `kingdomshiftmedia@gmail.com`. Opening it does not send an email or delete data. Operators must monitor that mailbox, verify ownership, and process requests; automated account deletion is not implemented.
-
-## Deployment and caching
-
-The service worker retires the old `ks-v*` caches and does not intercept requests. Deployments therefore use normal HTTP behavior rather than retaining an indefinitely cached application. Public legal hashes work without login; `404.html` recognizes the old legal paths and shows a real not-found page for unknown routes. Old stream-sharing query strings cannot start a stream while streaming is unavailable.
-
-Metadata and sitemap currently use `https://kingdomshiftlive.github.io/`. If publishing on a verified custom domain, update canonical, social-image, robots, sitemap, and policy links together. No custom-domain configuration is assumed.
+Versions and integrity metadata are pinned in npm and Deno lockfiles. Supabase and Zego browser bundles match the locked npm artifacts. Update the package, browser artifact, license, HTML/script reference, and matching integrity tests together. Keep signature/checksum/TLS verification enabled.
