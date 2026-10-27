@@ -14,7 +14,7 @@ BEGIN
   ) THEN
     RAISE EXCEPTION 'Stopped: public already contains tables. Use reviewed incremental migrations, not the empty-staging bootstrap.';
   END IF;
-END
+END;
 $guard$;
 
 
