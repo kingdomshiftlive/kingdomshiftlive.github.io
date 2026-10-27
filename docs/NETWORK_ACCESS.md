@@ -27,3 +27,7 @@ The additive network draft was saved successfully and requires review/save in **
 ## Remaining secure inputs
 
 Public build configuration: project URL and anon/publishable key. Provider configuration: authorized Supabase staging/deployment access, Stripe sandbox key/webhook signing secret and portal, rotated 32-byte Zego ServerSecret and App ID, correct Auth email/redirect settings, and administrator assignment. Enter raw signing secrets in the provider's secure runtime settings; proxy-backed placeholders cannot be used as local cryptographic signing keys. Never paste secret values into chat.
+
+## Final remote publication attempt
+
+A fresh `git fetch origin main` succeeded, and remote `main` is an ancestor of the completed review branch. Pushing `feat/kingdomshift-launch-readiness` failed with GitHub HTTP 403: **permission denied to `kingdomshift-academy`**. This is a repository authorization blocker, distinct from the CONNECT-proxy restriction on GitHub API/live-site requests. Grant that connected account repository write access, or use an already authorized repository identity, before retrying the push. Because the push failed, no remote feature branch or pull request was created. The prepared PR body is `docs/PULL_REQUEST.md`.

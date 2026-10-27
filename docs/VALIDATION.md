@@ -27,3 +27,7 @@ The final payment cases include expired/failed sessions, wrong amounts/currencie
 The browser tests block external requests and use synthetic authenticated/provider fixtures. PostgreSQL tests verify actual SQL and row/column permissions but do not reproduce the entire managed Supabase Storage/Auth service. Hosted email, staging uploads, real Stripe sandbox account lifecycle, physical-device Zego sessions, provider-side moderation/revocation, DNS, deployed headers, actual Pages settings, and production data integrity remain unverified.
 
 No production SQL, production data change, live payment/payout, live billing activation, or production deployment occurred. Pricing approval is preserved separately from launch approval. A configured staging environment and the read-only/PR network permissions in `NETWORK_ACCESS.md` are required to finish external acceptance and remote review publication.
+
+## Repository publication result
+
+All code, configuration, tests, and release documentation are committed on the local feature branch. A fresh remote-main fetch succeeded and confirmed that the branch includes current `main`. The feature-branch push was denied by GitHub for the connected `kingdomshift-academy` identity (HTTP 403). No remote PR was created and no merge/deployment occurred. Repository write authorization is required before remote review publication; the existing development-network draft must also be activated for GitHub API/live-service inspection.
