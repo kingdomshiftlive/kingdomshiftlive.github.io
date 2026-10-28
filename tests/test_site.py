@@ -209,7 +209,7 @@ class SiteTests(unittest.IsolatedAsyncioTestCase):
             self.assertTrue(await self.page.locator('#customer-dialog').is_visible())
             await self.page.get_by_label('Display name',exact=True).fill('Staging Test')
             await self.page.get_by_role('button',name='Save profile',exact=True).click()
-            await self.page.wait_for_function("!document.getElementById('customer-dialog').open")
+            await self.page.wait_for_function("!document.getElementById('customer-dialog')?.open")
             self.assertEqual(await self.page.locator('#sb-uname').inner_text(),'Staging Test')
             updates=await self.page.evaluate("window.auditDb.calls.filter(c=>c.table==='profiles'&&c.method==='update')")
             self.assertEqual(updates[-1]['args'][0]['display_name'],'Staging Test')
