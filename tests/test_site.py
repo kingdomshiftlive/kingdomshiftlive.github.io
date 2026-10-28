@@ -199,6 +199,22 @@ class SiteTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(records[-1]['args']['content_url'],'https://example.test/post')
         self.assertEqual(self.errors,[])
 
+    async def test_profile_edit_receives_clicks_and_saves_on_desktop_and_mobile(self):
+        await self.open()
+        await self.sign_in_locally()
+        for width in (1280, 390):
+            await self.page.set_viewport_size({'width':width,'height':844})
+            await self.page.evaluate("navigate('profile')")
+            await self.page.get_by_role('button',name='Edit Profile',exact=True).click()
+            self.assertTrue(await self.page.locator('#customer-dialog').is_visible())
+            await self.page.get_by_label('Display name',exact=True).fill('Staging Test')
+            await self.page.get_by_role('button',name='Save profile',exact=True).click()
+            await self.page.wait_for_function("!document.getElementById('customer-dialog').open")
+            self.assertEqual(await self.page.locator('#sb-uname').inner_text(),'Staging Test')
+            updates=await self.page.evaluate("window.auditDb.calls.filter(c=>c.table==='profiles'&&c.method==='update')")
+            self.assertEqual(updates[-1]['args'][0]['display_name'],'Staging Test')
+        self.assertEqual(self.errors,[])
+
     async def test_creator_comments_messages_and_admin_forms(self):
         await self.open()
         await self.sign_in_locally()
