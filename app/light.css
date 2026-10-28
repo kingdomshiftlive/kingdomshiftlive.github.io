@@ -1,0 +1,77 @@
+/* Light surfaces and readable contrast across account and community screens. */
+:root {
+  color-scheme: light;
+  --canvas: #f5f7f9;
+  --dark: #f5f7f9;
+  --dark2: #edf2f5;
+  --card: #ffffff;
+  --card2: #edf2f5;
+  --glass: #ffffff;
+  --glassTeal: #e5f3f1;
+  --border: #c6d3dc;
+  --borderG: #d3bb83;
+  --text: #172b3a;
+  --muted: #455969;
+  --dim: #526475;
+  --teal: #006b66;
+  --teal2: #00716d;
+  --tealD: #00544f;
+  --gold: #805400;
+  --gold2: #805400;
+  --gold3: #805400;
+  --pink: #a20e59;
+  --pink2: #a20e59;
+  --green: #18713b;
+  --red: #b42318;
+  --purple: #71429a;
+}
+html, body, .loading-wrap { background: var(--canvas); }
+.sidebar, .drawer, .topbar, .bottom-nav, .auth-card, .modal-card {
+  background: var(--card);
+}
+.auth-wrap { background: var(--canvas); }
+.auth-card { box-shadow: 0 12px 40px rgba(23,43,58,.12); }
+.auth-input, .input, .quiz-opt { background: #fff; }
+.wealth-hero, .safe-hero, .battles-hero, .pro-card, .profile-cover,
+.sc-thumb, .fp-media { background: var(--card2); }
+.profile-edit-btn, .sc-split, .gs-code { background: var(--card); }
+.profile-av, .story-inner, .tb-notif { border-color: var(--card); }
+.gate-bar, .toggle.off { background: #c6d3dc; }
+.sb-name, .tb-title, .auth-title, .shimmer-text, .bh-title, .qr-score,
+.ps-num, .asc-num {
+  background: none;
+  color: var(--teal);
+  -webkit-text-fill-color: currentColor;
+}
+.btn-teal, .auth-btn { background: var(--teal); color: #fff; }
+.btn-gold, .sf.active, .sc-add, .sb-badge.gold, .toast {
+  background: #efd17b;
+  color: #172b3a;
+}
+.toggle.on { background: var(--teal); }
+.sb-av, .profile-av { background: #d7eeea; }
+.sb-label, .sb-uname, .sr-label, .btn, .auth-btn, .fp-name,
+.fp-text, .fp-act, .profile-handle { font-size: 14px; }
+.sb-section, .sb-tagline, .bn-label, .ps-lbl, .asc-lbl,
+.sg-title, .sec-title { font-size: 11px; }
+.label, .auth-label { font-size: 12px; }
+.auth-sub, .auth-switch, .auth-input, .input, .page-sub,
+.content-card p, .post-body p { font-size: 16px; }
+.page-sub, .fp-text { font-weight: 400; }
+.topbar { min-height: 60px; height: auto; padding-block: 8px; }
+.tb-title { font-size: 18px; }
+.bn-item, .sb-tagline { opacity: 1; }
+.bn-item.active { background: var(--glassTeal); }
+.btn:disabled, .auth-btn:disabled { opacity: 1; background: #e2e8ed; color: #455969; }
+.fp-play { color: #fff; }
+.fp-cat-badge { color: #f5d060; }
+/* Video overlays keep light lettering on their dark media backdrop. */
+.live-stage {
+  --text: #ffffff;
+  --muted: #d7e1e9;
+  --teal: #4de3dc;
+  --gold: #f5d060;
+  color: var(--text);
+}
+.gift-float-card { --text: #fff; --teal: #4de3dc; }
+@media (max-width: 400px) { .tb-title { font-size: 14px; } }
