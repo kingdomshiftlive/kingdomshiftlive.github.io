@@ -92,4 +92,6 @@ BEGIN
  'content',coalesce((SELECT jsonb_agg(x) FROM (SELECT id,title,creator_id,description,file_path,created_at FROM public.videos WHERE status='pending' ORDER BY created_at LIMIT 50)x),'[]'::jsonb),
  'deletions',coalesce((SELECT jsonb_agg(x) FROM (SELECT * FROM public.account_deletion_requests WHERE status='pending' ORDER BY created_at LIMIT 50)x),'[]'::jsonb));
 END $$;
+-- Readiness must attest to this safety migration, not merely billing/catalog tables.
+CREATE OR REPLACE FUNCTION public.platform_health() RETURNS jsonb LANGUAGE sql STABLE SECURITY DEFINER SET search_path='' AS $$SELECT jsonb_build_object('schema_version',5);$$;
 COMMIT;

@@ -21,6 +21,11 @@ test("blocking revokes relationships and access; moderation requires evidence", 
         "migrations/005_community_safety.sql",
       ]
     ) await db.exec(await readFile(file, "utf8"));
+    assert.equal(
+      (await db.query("SELECT platform_health() AS data")).rows[0].data
+        .schema_version,
+      5,
+    );
     await db.query(
       "INSERT INTO profiles(id,username,role) VALUES($1,'alice','creator'),($2,'bob','creator'),($3,'op','admin')",
       [a, b, op],

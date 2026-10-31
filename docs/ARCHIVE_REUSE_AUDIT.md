@@ -1,6 +1,6 @@
 # KingdomShift archive comparison and local repair batches
 
-Baseline: `feat/kingdomshift-launch-readiness` at `e461a9cd3d9c4df0a0f06ccd9608475037a2fe30`, confirmed again with `git ls-remote`. Original checkout and branding are preserved. Repairs are on local branch `fix/kingdomshift-community-safety-batches`; nothing was pushed, merged, deployed, or applied to a remote database. Live billing was not enabled. Repository documents supplied context, not authorization for their deployment instructions.
+Baseline: `feat/kingdomshift-launch-readiness` at `e461a9cd3d9c4df0a0f06ccd9608475037a2fe30`, confirmed again with `git ls-remote`. Original checkout and branding are preserved. Repairs are on review branch `fix/kingdomshift-community-safety-batches`; no merge, deployment, or remote database migration has been performed. Live billing was not enabled. Repository documents supplied context, not authorization for their deployment instructions.
 
 ## Archive availability and reuse decision
 
@@ -63,7 +63,7 @@ Initial default-sandbox network/socket/cache failures were resolved using the pe
 ## Remaining launch blockers and acceptance work
 
 1. **Incomplete archive comparison:** GodInfluenceX exceeds the 32 MiB transfer limit. It has not been audited or reused.
-2. **Staging database acceptance:** designate a separate staging project and provide secure migration/admin capability. Review/inventory existing policies; apply the new migration there, inspect grants, test synthetic ordinary/admin accounts and storage. Current backend health reports schema version 4 and does not prove migration 005 is installed; verify migration history explicitly before release.
+2. **Staging database acceptance:** designate a separate staging project and provide secure migration/admin capability. Review/inventory existing policies; apply the new migration there, inspect grants, test synthetic ordinary/admin accounts and storage. Backend readiness now requires schema version 5 from migration 005; an older database fails readiness. Verify migration history and hosted policies explicitly before release.
 3. **Recovery/email acceptance:** verify SMTP, actual reset/confirmation delivery, approved redirect URLs, expired/replayed links, recovery-session behavior and mobile sessions with synthetic accounts. Local form tests do not prove recovery email delivery.
 4. **Moderation operations:** designate moderators, verify urgent report handling, content removal, suspension, audit retention and public support escalation. Urgent sorting does not notify an operator by itself.
 5. **Privacy limits:** identities remain discoverable; blocking retains message history and does not make already public content inaccessible when signed out. Previously issued signed media URLs may remain usable until expiry. Test these documented boundaries and acceptance expectations in staging.
@@ -71,4 +71,12 @@ Initial default-sandbox network/socket/cache failures were resolved using the pe
 7. **Provider/commercial readiness:** existing documentation identifies outstanding sandbox payment/webhook/download, streaming, promised Creator Pro benefits and legacy financial reconciliation checks. These were not live-tested in this work; keep live billing disabled.
 8. **Release controls:** existing documentation records legacy Pages publishing from main and missing required reviewers. Reverify current settings before any eventual release; a merge may publish automatically. No settings were changed.
 
-Review the two local commits/patches in order. Do not run production SQL, merge, publish, enable live billing or alter production records as part of reviewing this package.
+Review the repair commits in order. Do not run production SQL, merge, publish, enable live billing or alter production records as part of reviewing this package.
+
+## Launch preparation follow-up
+
+The inaccessible archive is optional reference material and is no longer a dependency for preparing a community launch. Read-only checks found that the configured Supabase Auth settings endpoint responds HTTP 200 (signups enabled, email confirmation required), while the `platform/health` Edge endpoint responds HTTP 404. This does not establish that the database schema is installed or that recovery email works. Only public Supabase credentials are configured; no provider administration or database-owner credentials are available.
+
+A follow-up repair makes migration 005 report schema version 5 and makes backend health reject older schema versions. Regression coverage verifies that schema 4 fails readiness and that a community launch can be ready with billing, Pro and streaming disabled. Launch instructions now include all five migrations.
+
+The review branch can be published for code review without merging into main or dispatching production deployment. Before any production release, obtain project administration access through secure configuration, identify the connected project as live or staging, verify backups and the outstanding hosted acceptance checks, and obtain the user's final production approval. Live billing remains outside that approval unless separately requested.

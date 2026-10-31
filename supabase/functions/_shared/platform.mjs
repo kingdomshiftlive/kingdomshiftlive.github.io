@@ -388,7 +388,7 @@ export function createPlatformHandler(
       }
       if (path === "/health" && request.method === "GET") {
         const health = await good(admin.rpc("platform_health"));
-        if (health?.schema_version !== 4) {
+        if (health?.schema_version !== 5) {
           throw new HttpError(503, "Database upgrade is required");
         }
         return reply(200, {
