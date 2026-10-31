@@ -34,7 +34,7 @@ function fixture(overrides = {}) {
       calls.push({ rpc: name, args });
       return {
         data: name === "platform_health"
-          ? { schema_version: 4 }
+          ? { schema_version: overrides.schemaVersion ?? 5 }
           : name === "billing_environment"
           ? "test"
           : null,
@@ -327,4 +327,24 @@ test("signed expired checkout events close pending receipts without granting val
   );
   assert.ok(f.calls.some((c) => c.rpc === "cancel_checkout"));
   assert.ok(!f.calls.some((c) => c.rpc === "fulfill_checkout"));
+});
+
+test("readiness requires the community safety migration and keeps launch billing disabled", async () => {
+  const stale = fixture({ schemaVersion: 4 });
+  const rejected = await stale.request("/health", undefined, { method: "GET" });
+  assert.equal(rejected.status, 503);
+  const current = fixture({
+    billingMode: "disabled",
+    streamingEnabled: false,
+    proEnabled: false,
+  });
+  const response = await current.request("/health", undefined, {
+    method: "GET",
+  });
+  assert.equal(response.status, 200);
+  const data = await response.json();
+  assert.equal(data.ready, true);
+  assert.equal(data.billing, "disabled");
+  assert.equal(data.pro, false);
+  assert.equal(data.streaming, false);
 });

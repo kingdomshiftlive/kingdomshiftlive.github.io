@@ -566,10 +566,14 @@ async function submitMessage(form) {
   }
 }
 async function blockMember(id) {
-  if (!confirm("Block messages and comments from this member?")) return;
+  if (!confirm("Block this member? This removes follows in both directions and prevents signed-in access to posts, messages, and comments.")) return;
   try {
     await call("set_user_block", { target: id, blocked: true });
-    showToast("Member blocked.");
+    S.posts = [];
+    S.postsLoaded = false;
+    await syncSocialState();
+    render();
+    showToast("Member blocked. Follows removed.");
   } catch (error) {
     actionError(error);
   }
@@ -671,15 +675,21 @@ function changePassword() {
         "password",
         'minlength="8" autocomplete="new-password" required',
       )
-    }<button class="btn btn-teal" type="submit">Update password</button><p id="form-status" role="status"></p></form>`,
+    }${field("Confirm new password", "confirm-password", "password", 'minlength="8" autocomplete="new-password" required')}<button class="btn btn-teal" type="submit">Update password</button><p id="form-status" role="status"></p></form>`,
   );
 }
 async function submitPassword(form) {
+  if (!form.reportValidity()) return;
+  const password = document.getElementById("new-password").value;
+  if (password !== document.getElementById("confirm-password").value) {
+    formStatus("Passwords do not match.");
+    return;
+  }
   const button = form.querySelector("[type=submit]");
   busy(button, true);
   try {
     const { error } = await sb.auth.updateUser({
-      password: document.getElementById("new-password").value,
+      password,
     });
     if (error) throw error;
     document.getElementById("customer-dialog").close();

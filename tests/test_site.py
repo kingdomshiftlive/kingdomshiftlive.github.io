@@ -356,5 +356,20 @@ class SiteTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual((await self.page.request.get(self.url+path)).status,200)
         self.assertEqual(self.errors,[])
 
+    async def test_password_confirmation_before_provider_update(self):
+        await self.open()
+        await self.sign_in_locally()
+        await self.page.evaluate("""()=>{window.passwordWrites=[];sb.auth.updateUser=async value=>{passwordWrites.push(value);return {error:null}};changePassword()}""")
+        await self.page.locator('#new-password').fill('safe-password-one')
+        await self.page.locator('#confirm-password').fill('safe-password-two')
+        await self.page.locator('#customer-dialog button[type=submit]').click()
+        self.assertIn('Passwords do not match',await self.page.locator('#form-status').inner_text())
+        self.assertEqual(await self.page.evaluate('passwordWrites.length'),0)
+        await self.page.locator('#confirm-password').fill('safe-password-one')
+        await self.page.locator('#customer-dialog button[type=submit]').click()
+        self.assertFalse(await self.page.locator('#customer-dialog').is_visible())
+        self.assertEqual(await self.page.evaluate('passwordWrites.length'),1)
+        self.assertEqual(self.errors,[])
+
 if __name__=='__main__':
     unittest.main()
